@@ -1,6 +1,7 @@
 """Merging evidence into a removal plan."""
 
 from datetime import datetime, timedelta, timezone
+from urllib.parse import urlsplit
 
 from offlist.core.models import Confidence, Evidence, Status
 from offlist.worklist import merge, remediation, triage
@@ -109,7 +110,9 @@ def test_an_unknown_broker_falls_back_to_the_statutory_route():
         merge.merge([ev("broker_registry", "obscure-broker.test")])))
     rem = records[0].remediation
     assert rem["kind"] == "drop_covered_only"
-    assert "privacy.ca.gov" in rem["url"]
+    # Check the host, not a substring: "https://evil.test/?x=privacy.ca.gov"
+    # would satisfy a substring test.
+    assert urlsplit(rem["url"]).hostname == "privacy.ca.gov"
 
 
 def test_no_statutory_right_is_stated_plainly():

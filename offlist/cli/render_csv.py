@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
+
+from offlist.core.paths import open_private
 from typing import Sequence
 
 from offlist.core.models import ProbeResult
@@ -42,7 +44,9 @@ def to_row(r: ProbeResult) -> dict:
 
 def write(results: Sequence[ProbeResult], path: Path) -> Path:
     path = Path(path)
-    with path.open("w", encoding="utf-8", newline="") as fh:
+    # An address plus every service it is registered on -- 0600, like the
+    # worklist store, rather than whatever the umask happens to be.
+    with open_private(path, newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=FIELDNAMES,
                                 extrasaction="ignore", restval="")
         writer.writeheader()

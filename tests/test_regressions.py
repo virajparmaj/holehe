@@ -181,3 +181,71 @@ def test_a_committed_public_positive_is_recorded_as_tier_b_not_tier_a():
     assert outcome.discriminating is Discriminating.YES
 
     assert judge(entry, negative, None).tier == "c"
+
+
+# ── files containing personal data are written owner-only ──────────────────
+# The worklist store took care over this from the start; the CSV, JSON and
+# letter writers did not, so the same class of data landed in the working
+# directory with whatever the umask allowed. CodeQL flagged it and it was right.
+
+def _mode(path) -> str:
+    import os
+    return oct(os.stat(path).st_mode)[-3:]
+
+
+def test_csv_export_is_owner_only(tmp_path):
+    from offlist.cli import render_csv
+    from offlist.core.models import ProbeResult, Status
+
+    path = render_csv.write(
+        [ProbeResult(site_id="a", domain="a.test", status=Status.REGISTERED)],
+        tmp_path / "out.csv")
+    assert _mode(path) == "600"
+
+
+def test_json_export_is_owner_only(tmp_path):
+    from offlist.cli import render_json
+    from offlist.core.models import ProbeResult, Status
+
+    path = render_json.write(
+        [ProbeResult(site_id="a", domain="a.test", status=Status.REGISTERED)],
+        "you@example.com", 1.0, tmp_path / "out.json")
+    assert _mode(path) == "600"
+
+
+def test_generated_letters_are_owner_only(tmp_path):
+    from offlist.act import letters
+    from offlist.core.email import EmailAddress
+    from offlist.core.models import ServiceRecord
+
+    record = ServiceRecord(service="s", display_name="S", domains=["s.test"])
+    record.remediation = {"kind": "email_request"}
+    path = letters.write(record, EmailAddress("you@example.com"), tmp_path / "letters")
+    assert _mode(path) == "600"
+    assert oct(path.parent.stat().st_mode)[-3:] == "700"
+
+
+def test_private_write_does_not_leave_a_world_readable_window(tmp_path):
+    """Created with 0600 rather than written and chmod-ed afterwards."""
+    import os
+
+    from offlist.core.paths import open_private
+
+    path = tmp_path / "x.txt"
+    with open_private(path) as handle:
+        # the file exists now, mid-write -- check the mode before it closes
+        assert oct(os.stat(path).st_mode)[-3:] == "600"
+        handle.write("secret")
+    assert _mode(path) == "600"
+
+
+def test_an_existing_permissive_file_is_tightened_on_rewrite(tmp_path):
+    import os
+
+    from offlist.core.paths import write_private_text
+
+    path = tmp_path / "x.txt"
+    path.write_text("old")
+    os.chmod(path, 0o644)
+    write_private_text(path, "new")
+    assert _mode(path) == "600"

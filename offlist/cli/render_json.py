@@ -6,6 +6,8 @@ import json
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+
+from offlist.core.paths import write_private_text
 from typing import Sequence
 
 from offlist import __version__
@@ -49,6 +51,5 @@ def to_dict(results: Sequence[ProbeResult], email: str, elapsed: float) -> dict:
 def write(results: Sequence[ProbeResult], email: str, elapsed: float,
           path: Path) -> Path:
     path = Path(path)
-    path.write_text(json.dumps(to_dict(results, email, elapsed), indent=2),
-                    encoding="utf-8")
-    return path
+    return write_private_text(
+        path, json.dumps(to_dict(results, email, elapsed), indent=2))

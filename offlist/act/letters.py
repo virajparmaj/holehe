@@ -8,12 +8,14 @@ letter is the useful part; pressing send is yours.
 
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
 
 from offlist.core.email import EmailAddress
+from offlist.core.paths import PRIVATE_DIR, write_private_text
 from offlist.core.models import ServiceRecord
 
 
@@ -139,8 +141,9 @@ def write(record: ServiceRecord, email: EmailAddress, directory: Path, *,
           today: date | None = None) -> Path:
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
+    os.chmod(directory, PRIVATE_DIR)
     text = compose(record, email, jurisdiction=jurisdiction, full_name=full_name,
                    today=today)
-    path = directory / f"{_slug(record.service)}-deletion-request.txt"
-    path.write_text(text, encoding="utf-8")
-    return path
+    # Carries your name, address and the services involved.
+    return write_private_text(
+        directory / f"{_slug(record.service)}-deletion-request.txt", text)
