@@ -1,0 +1,184 @@
+# How to make each service stop holding your address.
+#
+# `kind` runs from fully automatable to "there is no known path", and the honest
+# `none_known` entries matter as much as the rest -- they are the catalogue's
+# TODO list. `verified` is the date a human last confirmed the URL still works;
+# these rot, and a stale opt-out link wastes the user's time.
+services:
+
+  california_drop:
+    kind: drop_covered_only
+    url: https://privacy.ca.gov/data-brokers
+    drop_covered: true
+    estimated_effort_minutes: 20
+    recheck_after_days: 45
+    notes: >
+      One authenticated request at privacy.ca.gov reaches every broker on the
+      statutory registry. It is California-resident only and consumer
+      authenticated, so no tool can submit it on your behalf -- but it is by far
+      the highest-leverage single action here. From 1 August 2026 registered
+      brokers must poll DROP at least every 45 days.
+    verified: 2026-08-18
+
+  github:
+    kind: self_serve_delete
+    url: https://github.com/settings/emails
+    estimated_effort_minutes: 5
+    notes: >
+      Public commits publish the author address permanently and it is scraped
+      routinely. Enable "Keep my email address private", then stop the leak at
+      source with `git config --global user.email <id>+<user>@users.noreply.github.com`.
+      Past commits keep the old address unless the history is rewritten.
+    verified: 2026-08-18
+
+  # ---------------------------------------------------------------- brokers
+  spokeo:
+    kind: opt_out_form
+    url: https://www.spokeo.com/optout
+    requires_identity_proof: false
+    requires_email_confirmation: true
+    drop_covered: true
+    estimated_effort_minutes: 5
+    recheck_after_days: 45
+    notes: "Paste the profile URL, then confirm via a link mailed to the address."
+    source: yaelwrites/Big-Ass-Data-Broker-Opt-Out-List
+    verified: 2026-08-18
+
+  beenverified:
+    kind: opt_out_form
+    url: https://www.beenverified.com/app/optout/search
+    requires_identity_proof: false
+    requires_email_confirmation: true
+    drop_covered: true
+    estimated_effort_minutes: 5
+    recheck_after_days: 45
+    notes: "Search for the record, select it, confirm by email. 1-3 business days."
+    source: yaelwrites/Big-Ass-Data-Broker-Opt-Out-List
+    verified: 2026-08-18
+
+  radaris:
+    kind: opt_out_form
+    url: https://radaris.com/control/privacy
+    requires_identity_proof: true
+    drop_covered: true
+    estimated_effort_minutes: 15
+    recheck_after_days: 45
+    notes: "Requires creating an account to claim the profile before removal."
+    source: yaelwrites/Big-Ass-Data-Broker-Opt-Out-List
+    verified: 2026-08-18
+
+  whitepages:
+    kind: opt_out_form
+    url: https://www.whitepages.com/suppression-requests
+    requires_identity_proof: false
+    requires_email_confirmation: true
+    drop_covered: true
+    estimated_effort_minutes: 10
+    recheck_after_days: 45
+    source: yaelwrites/Big-Ass-Data-Broker-Opt-Out-List
+    verified: 2026-08-18
+
+  intelius:
+    kind: opt_out_form
+    url: https://www.intelius.com/opt-out
+    drop_covered: true
+    estimated_effort_minutes: 10
+    recheck_after_days: 45
+    source: yaelwrites/Big-Ass-Data-Broker-Opt-Out-List
+    verified: 2026-08-18
+
+  peoplefinders:
+    kind: opt_out_form
+    url: https://www.peoplefinders.com/opt-out
+    drop_covered: true
+    estimated_effort_minutes: 10
+    recheck_after_days: 45
+    source: yaelwrites/Big-Ass-Data-Broker-Opt-Out-List
+    verified: 2026-08-18
+
+  mylife:
+    kind: email_request
+    url: https://www.mylife.com/privacy-policy
+    contact_email: privacy@mylife.com
+    drop_covered: true
+    estimated_effort_minutes: 15
+    notes: "No reliable self-serve form; a written deletion request is the usual route."
+    source: yaelwrites/Big-Ass-Data-Broker-Opt-Out-List
+    verified: 2026-08-18
+
+  acxiom:
+    kind: opt_out_form
+    url: https://isapps.acxiom.com/optout/optout.aspx
+    drop_covered: true
+    estimated_effort_minutes: 10
+    verified: 2026-08-18
+
+  lexisnexis:
+    kind: opt_out_form
+    url: https://optout.lexisnexis.com/
+    requires_identity_proof: true
+    drop_covered: true
+    estimated_effort_minutes: 20
+    verified: 2026-08-18
+
+  # ------------------------------------------------------- accounts you hold
+  gravatar:
+    kind: self_serve_delete
+    url: https://gravatar.com/profiles/edit/
+    estimated_effort_minutes: 5
+    notes: >
+      A Gravatar profile is public to anyone holding your address. You can make it
+      private or delete it from the profile settings; deleting the WordPress.com
+      account behind it removes it entirely.
+    verified: 2026-08-18
+
+  google:
+    kind: self_serve_delete
+    url: https://myaccount.google.com/delete-services-or-account
+    estimated_effort_minutes: 15
+    notes: "Check 'Apps with access to your account' first -- those are separate grants."
+    verified: 2026-08-18
+
+  microsoft:
+    kind: self_serve_delete
+    url: https://account.live.com/closeaccount.aspx
+    estimated_effort_minutes: 15
+    verified: 2026-08-18
+
+  adobe:
+    kind: self_serve_delete
+    url: https://account.adobe.com/privacy
+    estimated_effort_minutes: 10
+    verified: 2026-08-18
+
+  amazon:
+    kind: self_serve_delete
+    url: https://www.amazon.com/gp/help/customer/display.html?nodeId=GDK92DNLGWTflBrL
+    estimated_effort_minutes: 15
+    verified: 2026-08-18
+
+  x_twitter:
+    kind: self_serve_delete
+    url: https://x.com/settings/deactivate
+    estimated_effort_minutes: 5
+    notes: "Deactivation becomes deletion after 30 days."
+    verified: 2026-08-18
+
+  meta_facebook:
+    kind: self_serve_delete
+    url: https://www.facebook.com/help/delete_account
+    estimated_effort_minutes: 10
+    verified: 2026-08-18
+
+  meta_instagram:
+    kind: self_serve_delete
+    url: https://www.instagram.com/accounts/remove/request/permanent/
+    estimated_effort_minutes: 10
+    verified: 2026-08-18
+
+  wordpress:
+    kind: self_serve_delete
+    url: https://wordpress.com/me/account/close
+    estimated_effort_minutes: 10
+    notes: "Closing this also removes the linked Gravatar profile."
+    verified: 2026-08-18
