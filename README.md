@@ -1,241 +1,249 @@
-# **Holehe OSINT - Email to Registered Accounts**
-👋 Hi there! For any professional inquiries or collaborations, please reach out to me at:
-megadose@protonmail.com
+# offlist
 
-📧 Preferably, use your professional email for correspondence. Let's keep it short and sweet, and all in English!
+**Find which services hold your email address, and get a worklist for making them delete it.**
 
-![](https://files.catbox.moe/5we2ya.png)
-![PyPI](https://img.shields.io/pypi/v/holehe) ![PyPI - Week](https://img.shields.io/pypi/dw/holehe) ![PyPI - Downloads](https://static.pepy.tech/badge/holehe) ![PyPI - License](https://img.shields.io/pypi/l/holehe)
+A hard fork of [megadose/holehe](https://github.com/megadose/holehe). The original
+answers "is this email registered on site X". This answers a different question:
+*which sites hold my address that shouldn't, and how do I get off their list?*
 
-# [Holehe Online Version](https://osint.industries/)
+---
 
-## **Summary**
+## Why the fork
 
-*Efficiently finding registered accounts from emails.*
+I instrumented the original and ran all 123 site modules against a live network,
+logging every HTTP exchange.
 
-Holehe checks if an email is attached to an account on sites like twitter, instagram, imgur and more than 120 others.
+| | |
+|---|---|
+| Modules that returned no usable answer | **76 of 123** |
+| Of those, genuine HTTP 429 rate limits | **2** |
+| Modules that provably distinguish a real address from a fake one | **21** |
 
-+ Retrieves information using the forgotten password function.
-+ **[Does not alert the target email.](https://github.com/megadose/holehe/issues/12)**
-+ Runs on [Python 3](https://www.python.org/downloads/release/python-370/).
-## 🛠️ Installation
+Every one of those 76 failures was reported to the user as `[x] Rate limit`,
+because each module funnelled every failure — dead endpoints, WAF blocks, dead
+hosts, changed response formats — through a single `rateLimit` boolean set from a
+bare `except Exception`.
 
-### With PyPI
+Throttling does not fix it. Re-running gated at 4 concurrent requests with jitter
+left 67 of 69 unchanged: every module talks to a different host, so global
+concurrency was never the constraint.
 
-```pip3 install holehe```
+Worse, a control run against a fabricated address showed 26 modules answering
+"not used" for *everything*, including `amazon`, `wordpress`, `gravatar` and
+`quora` for `test@gmail.com`. There was no test suite, so that had been true for
+years without anyone noticing.
 
-### With Github
+## What changed
+
+**Failures name their real cause.** `rateLimit: bool` became a status enum —
+`rate_limited`, `blocked`, `endpoint_gone`, `unreachable`, `server_error`,
+`parse_failed`. Each one implies a different fix: retry, change client, or fix
+the definition in this repo.
+
+**A negative has to be earned.** Every site records whether a canary has ever
+proven it distinguishes a real address from a fabricated one. If it hasn't, its
+"no account here" is reported as `indeterminate`, not as an answer.
+
+**Sites are data, not code.** 25 of the original modules were byte-identical MyBB
+forum clones differing only in a base URL — roughly 2,000 lines that are now one
+engine and 25 one-line rows.
+
+**Probing is one source of five.** The others are better at the actual question:
+
+| Source | Question it answers | Precision |
+|---|---|---|
+| Vault CSV import | Where did I *deliberately* sign up? | exact, offline |
+| Data-broker registry | Who holds my data that I never gave them? | exact — registration is compulsory |
+| Public exposure | Where is my address publicly readable? | high |
+| Breach data (HIBP) | Who has already lost my address? | high, opt-in |
+| Endpoint probing | Accounts I forgot, or never made | low until canary-verified |
+
+## Install
 
 ```bash
-git clone https://github.com/megadose/holehe.git
-cd holehe/
-python3 setup.py install
+pip install .
 ```
 
-### With Docker
+## Use
+
+Probe the catalogue for one address:
 
 ```bash
-docker build . -t my-holehe-image
-docker run my-holehe-image holehe test@gmail.com
+offlist scan you@example.com
 ```
 
-## Quick Start
-
-Holehe can be run from the CLI and rapidly embedded within existing python applications.
-### 📚 CLI Example
+Catalogue health, no network:
 
 ```bash
-holehe test@gmail.com
-```
-### 📈 Python Example
-
-```python
-import trio
-import httpx
-
-from holehe.modules.social_media.snapchat import snapchat
-
-
-async def main():
-    email = "test@gmail.com"
-    out = []
-    client = httpx.AsyncClient()
-
-    await snapchat(email, client, out)
-
-    print(out)
-    await client.aclose()
-
-trio.run(main)
-```
-![](https://github.com/megadose/gif-demo/raw/master/holehe-demo.gif)
-## Module Output
-
-For each module, data is returned in a standard dictionary with the following json-equivalent format :
-```json
-{
-  "name": "example",
-  "rateLimit": false,
-  "exists": true,
-  "emailrecovery": "ex****e@gmail.com",
-  "phoneNumber": "0*******78",
-  "others": null
-}
+offlist doctor
 ```
 
-- rateLitmit : Lets you know if you've been rate-limited.
-- exists : If an account exists for the email on that service.
-- emailrecovery : Sometimes partially obfuscated recovery emails are returned.
-- phoneNumber : Sometimes partially obfuscated recovery phone numbers are returned.
-- others : Any extra info.
+Pull the statutory data-broker registry (~600 companies, refreshed annually):
 
+```bash
+offlist brokers refresh
+```
 
-Rate limit? Change your IP.
+Import a password-manager export — 1Password, Bitwarden, Chrome, Firefox:
 
+```bash
+offlist import you@example.com ~/Downloads/export.csv
+```
 
-## Maltego Transform : [Holehe Maltego](https://github.com/megadose/holehe-maltego)
+Build the removal worklist:
 
-## Thank you to :
+```bash
+offlist worklist you@example.com --vault ~/Downloads/export.csv --jurisdiction CA --format md
+```
 
-- [navlys](https://twitter.com/navlys_/)
-- [Chris](https://twitter.com/chris_kirsch)
-- [socialscan](https://pypi.org/project/socialscan/)
-- [UhOh365](https://github.com/Raikia/UhOh365)
-- [soxoj](https://github.com/soxoj)
-- [mxrch](https://github.com/mxrch) (and for the logo)
-- [novitae](https://github.com/novitae)
+Work through the plan. Dry run by default — nothing leaves your machine:
 
-## Donations
+```bash
+offlist act you@example.com --mail ~/saved-mail/ --jurisdiction CA
+```
 
-For BTC Donations : 1FHDM49QfZX6pJmhjLE5tB2K6CaTLMZpXZ
+Actually do it, with a separate yes for each item:
 
-## 📝 License
+```bash
+offlist act you@example.com --mail ~/saved-mail/ --execute
+```
 
-[GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.fr.html)
+Check the catalogue still works and record what that proved:
 
-Built for educational purposes only.
+```bash
+offlist canary --positives offlist/catalogue/canary/public_positives.yaml --write-ledger
+```
 
-## Modules
-| Name                | Domain                                 | Method            | Frequent Rate Limit |
-| ------------------- | -------------------------------------- | ----------------- | ------------------- |
-| aboutme             | about.me                               | register          | ✘               |
-| adobe               | adobe.com                              | password recovery | ✘               |
-| amazon              | amazon.com                             | login             | ✘               |
-| amocrm              | amocrm.com                             | register          | ✘               |
-| anydo               | any.do                                 | login             | ✔               |
-| archive             | archive.org                            | register          | ✘               |
-| armurerieauxerre    | armurerie-auxerre.com                  | register          | ✘               |
-| atlassian           | atlassian.com                          | register          | ✘               |
-| axonaut             | axonaut.com                            | register          | ✘               |
-| babeshows           | babeshows.co.uk                        | register          | ✘               |
-| badeggsonline       | badeggsonline.com                      | register          | ✘               |
-| biosmods            | bios-mods.com                          | register          | ✘               |
-| biotechnologyforums | biotechnologyforums.com                | register          | ✘               |
-| bitmoji             | bitmoji.com                            | login             | ✘               |
-| blablacar           | blablacar.com                          | register          | ✔               |
-| blackworldforum     | blackworldforum.com                    | register          | ✔               |
-| blip                | blip.fm                                | register          | ✔               |
-| blitzortung         | forum.blitzortung.org                  | register          | ✘               |
-| bluegrassrivals     | bluegrassrivals.com                    | register          | ✘               |
-| bodybuilding        | bodybuilding.com                       | register          | ✘               |
-| buymeacoffee        | buymeacoffee.com                       | register          | ✔               |
-| cambridgemt         | discussion.cambridge-mt.com            | register          | ✘               |
-| caringbridge        | caringbridge.org                       | register          | ✘               |
-| chinaphonearena     | chinaphonearena.com                    | register          | ✘               |
-| clashfarmer         | clashfarmer.com                        | register          | ✔               |
-| codecademy          | codecademy.com                         | register          | ✔               |
-| codeigniter         | forum.codeigniter.com                  | register          | ✘               |
-| codepen             | codepen.io                             | register          | ✘               |
-| coroflot            | coroflot.com                           | register          | ✘               |
-| cpaelites           | cpaelites.com                          | register          | ✘               |
-| cpahero             | cpahero.com                            | register          | ✘               |
-| cracked_to          | cracked.to                             | register          | ✔               |
-| crevado             | crevado.com                            | register          | ✔               |
-| deliveroo           | deliveroo.com                          | register          | ✔               |
-| demonforums         | demonforums.net                        | register          | ✔               |
-| devrant             | devrant.com                            | register          | ✘               |
-| diigo               | diigo.com                              | register          | ✘               |
-| discord             | discord.com                            | register          | ✘               |
-| docker              | docker.com                             | register          | ✘               |
-| dominosfr           | dominos.fr                             | register          | ✔               |
-| ebay                | ebay.com                               | login             | ✔               |
-| ello                | ello.co                                | register          | ✘               |
-| envato              | envato.com                             | register          | ✘               |
-| eventbrite          | eventbrite.com                         | login             | ✘               |
-| evernote            | evernote.com                           | login             | ✘               |
-| fanpop              | fanpop.com                             | register          | ✘               |
-| firefox             | firefox.com                            | register          | ✘               |
-| flickr              | flickr.com                             | login             | ✘               |
-| freelancer          | freelancer.com                         | register          | ✘               |
-| freiberg            | drachenhort.user.stunet.tu-freiberg.de | register          | ✘               |
-| garmin              | garmin.com                             | register          | ✔               |
-| github              | github.com                             | register          | ✘               |
-| google              | google.com                             | register          | ✔               |
-| gravatar            | gravatar.com                           | other             | ✘               |
-| hubspot             | hubspot.com                            | login             | ✘               |
-| imgur               | imgur.com                              | register          | ✔               |
-| insightly           | insightly.com                          | login             | ✘               |
-| instagram           | instagram.com                          | register          | ✔               |
-| issuu               | issuu.com                              | register          | ✘               |
-| koditv              | forum.kodi.tv                          | register          | ✘               |
-| komoot              | komoot.com                             | register          | ✔               |
-| laposte             | laposte.fr                             | register          | ✘               |
-| lastfm              | last.fm                                | register          | ✘               |
-| lastpass            | lastpass.com                           | register          | ✘               |
-| mail_ru             | mail.ru                                | password recovery | ✘               |
-| mybb                | community.mybb.com                     | register          | ✘               |
-| myspace             | myspace.com                            | register          | ✘               |
-| nattyornot          | nattyornotforum.nattyornot.com         | register          | ✘               |
-| naturabuy           | naturabuy.fr                           | register          | ✘               |
-| ndemiccreations     | forum.ndemiccreations.com              | register          | ✘               |
-| nextpvr             | forums.nextpvr.com                     | register          | ✘               |
-| nike                | nike.com                               | register          | ✘               |
-| nimble              | nimble.com                             | register          | ✘               |
-| nocrm               | nocrm.io                               | register          | ✘               |
-| nutshell            | nutshell.com                           | register          | ✘               |
-| odnoklassniki       | ok.ru                                  | password recovery | ✘               |
-| office365           | office365.com                          | other             | ✔               |
-| onlinesequencer     | onlinesequencer.net                    | register          | ✘               |
-| parler              | parler.com                             | login             | ✘               |
-| patreon             | patreon.com                            | login             | ✔               |
-| pinterest           | pinterest.com                          | register          | ✘               |
-| pipedrive           | pipedrive.com                          | register          | ✘               |
-| plurk               | plurk.com                              | register          | ✘               |
-| pornhub             | pornhub.com                            | register          | ✘               |
-| protonmail          | protonmail.ch                          | other             | ✘               |
-| quora               | quora.com                              | register          | ✘               |
-| rambler             | rambler.ru                             | register          | ✘               |
-| redtube             | redtube.com                            | register          | ✘               |
-| replit              | replit.com                             | register          | ✔               |
-| rocketreach         | rocketreach.co                         | register          | ✘               |
-| samsung             | samsung.com                            | register          | ✘               |
-| seoclerks           | seoclerks.com                          | register          | ✘               |
-| sevencups           | 7cups.com                              | register          | ✔               |
-| smule               | smule.com                              | register          | ✔               |
-| snapchat            | snapchat.com                           | login             | ✘               |
-| soundcloud          | soundcloud.com                         | register          | ✘               |
-| sporcle             | sporcle.com                            | register          | ✘               |
-| spotify             | spotify.com                            | register          | ✔               |
-| strava              | strava.com                             | register          | ✘               |
-| taringa             | taringa.net                            | register          | ✔               |
-| teamleader          | teamleader.com                         | register          | ✘               |
-| teamtreehouse       | teamtreehouse.com                      | register          | ✘               |
-| tellonym            | tellonym.me                            | register          | ✘               |
-| thecardboard        | thecardboard.org                       | register          | ✘               |
-| therianguide        | forums.therian-guide.com               | register          | ✘               |
-| thevapingforum      | thevapingforum.com                     | register          | ✘               |
-| tumblr              | tumblr.com                             | register          | ✘               |
-| tunefind            | tunefind.com                           | register          | ✔               |
-| twitter             | twitter.com                            | register          | ✘               |
-| venmo               | venmo.com                              | register          | ✔               |
-| vivino              | vivino.com                             | register          | ✘               |
-| voxmedia            | voxmedia.com                           | register          | ✘               |
-| vrbo                | vrbo.com                               | register          | ✘               |
-| vsco                | vsco.co                                | register          | ✘               |
-| wattpad             | wattpad.com                            | register          | ✔               |
-| wordpress           | wordpress                              | login             | ✘               |
-| xing                | xing.com                               | register          | ✘               |
-| xnxx                | xnxx.com                               | register          | ✔               |
-| xvideos             | xvideos.com                            | register          | ✘               |
-| yahoo               | yahoo.com                              | login             | ✔               |
-| zoho                | zoho.com                               | login             | ✔               |
+## The worklist
+
+Each entry says why it is there, what the evidence was and when it was observed,
+and the exact route to removal — a deletion URL, an opt-out form, a one-click
+unsubscribe, or a generated GDPR/CCPA letter.
+
+The flag that matters most is `never_signed_up`: something can prove a service
+holds your address, and your own credential store has no record of you creating
+an account there.
+
+Evidence is append-only, so the file doubles as an audit log. Conflicting
+evidence is kept side by side rather than resolved — "the probe says no account,
+your vault says you have a password there" is itself a finding.
+
+## Adding a site
+
+Sites live in `offlist/catalogue/sites/*.yaml`:
+
+```yaml
+- id: example
+  domain: example.com
+  category: social_media
+  method: register
+  steps:
+    - id: check
+      method: GET
+      url: https://example.com/api/email-available
+      params: { email: "{email}" }
+  rules:
+    - when: { json: { path: taken, equals: true } }
+      then: registered
+    - when: { json: { path: taken, equals: false } }
+      then: not_registered
+```
+
+There is no implicit "not registered". A definition that falls off the end of its
+rules reports `parse_failed`, because reaching the end means the site said
+something you have never seen. Claiming a negative needs a rule that matched.
+
+Sites sharing a platform share an engine (`offlist/catalogue/engines/`), so a new
+MyBB forum is one line.
+
+## Acting on the worklist
+
+`offlist act` turns each worklist entry into a concrete step and shows you
+exactly what it would do. Four outcomes:
+
+| | |
+|---|---|
+| **one-click unsubscribe** | The only thing the tool performs itself, and only when a DKIM signature proves the sender vouches for the unsubscribe URL. |
+| **letters** | A GDPR Art.17 / CCPA §1798.105 deletion request, written to disk. You send it. |
+| **URLs** | Opt-out forms and account-deletion pages. The tool hands you the link and stays out of the way. |
+| **nothing known** | An honest gap, and a TODO for `offlist/data/remediation.yaml`. |
+
+### Why unsubscribing needs a signature
+
+POSTing to an unsubscribe URL tells whoever runs it that your address is live,
+monitored, and belongs to someone who reads their mail. For a real newsletter
+that is fine. For a spammer it is a favour, and it makes things worse.
+
+RFC 8058 one-click only means something when the headers carrying that URL are
+covered by a DKIM signature the sender cannot forge. So `offlist act` checks
+three separate things and requires all of them:
+
+1. a signature exists and its `h=` tag covers `List-Unsubscribe` **and**
+   `List-Unsubscribe-Post`;
+2. the signature actually verifies;
+3. the signing domain owns the host you would POST to — a validly signed message
+   from `bulk-sender.test` pointing at `pharma-deals.test` is refused.
+
+Anything short of all three is refused with the reason spelled out. "Could not
+check" is reported separately from "checked and failed", and an unverified
+signature never counts as a pass. Without `offlist[dkim]` installed the feature
+degrades to *refused with an explanation*, never to *sent unchecked*.
+
+Messages come from `--mail`, which reads `.eml` files, mbox files, or a maildir —
+drag them out of any mail client. Phase 8 will feed the same parser over OAuth.
+
+## Safety
+
+Some probes have side effects, and they are off unless you ask for them:
+
+- **`--allow-login-probe`** — seven checks submit a deliberately wrong password.
+  That increments failed-login counters and feeds fraud scoring; you can lock
+  yourself out of your own account running your own audit.
+- **`--allow-email-sending`** — four checks trigger a real password-recovery
+  email to the address.
+
+Both additionally require `--i-own-this`. Probes that would create an account are
+never selectable.
+
+`offlist worklist` and `offlist act` are read-only until you pass `--execute`,
+and `--execute` asks about each item on its own, showing the literal request
+first. There is no `--yes-to-all`: those flags exist solely so the tool can
+refuse them and explain why. Running `--execute` without a terminal is refused
+too, so it cannot sail through prompts in a cron job.
+
+Deletion letters are generated, never sent. There is no SMTP client anywhere in
+`offlist/act/`, and a test asserts one never appears — a tool that can mail on
+your behalf is a bulk sender operating under your identity, and a misfire leaves
+no audit trail.
+
+The worklist file is a concentrated dossier — every service you use, which have
+been breached, which leak recovery identifiers. It is stored under
+`~/.local/state/offlist/`, mode `0600`, with the address hashed into the path
+rather than written into a filename.
+
+HIBP's breach API has no k-anonymity: querying it sends your address in plaintext
+to a third party. Nothing is queried without an explicit key
+(`offlist worklist --explain-hibp`).
+
+## What this is not
+
+- **Not a 3,000-site scanner.** The measurement above is the argument: 60
+  canary-green sites beat 500 unknown ones.
+- **Not a third-party OSINT tool.** Batch address input is refused by default.
+- **Not an auto-remediator.** It produces a worklist; you act on it.
+- **Not a DROP client.** California's Delete Act platform is consumer
+  authenticated and resident-only; the tool reports coverage and links you there.
+
+## Migration status
+
+`offlist doctor` reports it. The original modules still run through a legacy
+bridge, which classifies their failures by what the server actually did rather
+than by their own `rateLimit` boolean. Entries move to declarative definitions
+one at a time; `tests/test_legacy_core.py` pins the crash-level fixes until the
+old tree is deleted.
+
+## Licence
+
+GPLv3, inherited from holehe. The original README is kept as
+`README.holehe-original.md`, and the original credits stand — this is a fork of
+their work, not a replacement for it.
