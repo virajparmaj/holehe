@@ -3,8 +3,6 @@ from termcolor import colored
 import httpx
 import trio
 
-from subprocess import Popen, PIPE
-import os
 from argparse import ArgumentParser
 import csv
 from datetime import datetime
@@ -22,16 +20,154 @@ from holehe.localuseragent import ua
 from holehe.instruments import TrioProgress
 
 
-try:
-    import cookielib
-except Exception:
-    import http.cookiejar as cookielib
+from holehe import __version__
 
-
-DEBUG        = False
 EMAIL_FORMAT = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
-__version__ = "1.61"
+# Every module emits this exact set of keys, and so does the failure path in
+# launch_module(). Pinning it here is what stops export_csv() from deriving
+# fieldnames off whichever row happened to sort first.
+CSV_FIELDNAMES = (
+    "name",
+    "domain",
+    "method",
+    "frequent_rate_limit",
+    "rateLimit",
+    "error",
+    "exists",
+    "emailrecovery",
+    "phoneNumber",
+    "others",
+)
+
+
+# name -> domain, generated from each module's own `domain` literal.
+# Only used to label a row when a module raises before it can report for itself.
+MODULE_DOMAINS = {
+    'aboutme': 'about.me',
+    'adobe': 'adobe.com',
+    'amazon': 'amazon.com',
+    'amocrm': 'amocrm.com',
+    'anydo': 'any.do',
+    'archive': 'archive.org',
+    'armurerieauxerre': 'armurerie-auxerre.com',
+    'atlassian': 'atlassian.com',
+    'axonaut': 'axonaut.com',
+    'babeshows': 'babeshows.co.uk',
+    'badeggsonline': 'badeggsonline.com',
+    'biosmods': 'bios-mods.com',
+    'biotechnologyforums': 'biotechnologyforums.com',
+    'bitmoji': 'bitmoji.com',
+    'blablacar': 'blablacar.com',
+    'blackworldforum': 'blackworldforum.com',
+    'blip': 'blip.fm',
+    'blitzortung': 'forum.blitzortung.org',
+    'bluegrassrivals': 'bluegrassrivals.com',
+    'bodybuilding': 'bodybuilding.com',
+    'buymeacoffee': 'buymeacoffee.com',
+    'cambridgemt': 'discussion.cambridge-mt.com',
+    'caringbridge': 'caringbridge.org',
+    'chinaphonearena': 'chinaphonearena.com',
+    'clashfarmer': 'clashfarmer.com',
+    'codecademy': 'codecademy.com',
+    'codeigniter': 'forum.codeigniter.com',
+    'codepen': 'codepen.io',
+    'coroflot': 'coroflot.com',
+    'cpaelites': 'cpaelites.com',
+    'cpahero': 'cpahero.com',
+    'cracked_to': 'cracked.to',
+    'crevado': 'crevado.com',
+    'deliveroo': 'deliveroo.com',
+    'demonforums': 'demonforums.net',
+    'devrant': 'devrant.com',
+    'diigo': 'diigo.com',
+    'discord': 'discord.com',
+    'docker': 'docker.com',
+    'dominosfr': 'dominos.fr',
+    'duolingo': 'duolingo.com',
+    'ebay': 'ebay.com',
+    'ello': 'ello.co',
+    'envato': 'envato.com',
+    'eventbrite': 'eventbrite.com',
+    'evernote': 'evernote.com',
+    'facebook': 'facebook.com',
+    'fanpop': 'fanpop.com',
+    'firefox': 'firefox.com',
+    'flickr': 'flickr.com',
+    'freelancer': 'freelancer.com',
+    'freiberg': 'drachenhort.user.stunet.tu-freiberg.de',
+    'garmin': 'garmin.com',
+    'github': 'github.com',
+    'google': 'google.com',
+    'gravatar': 'en.gravatar.com',
+    'hubspot': 'hubspot.com',
+    'imgur': 'imgur.com',
+    'insightly': 'insightly.com',
+    'instagram': 'instagram.com',
+    'issuu': 'issuu.com',
+    'koditv': 'forum.kodi.tv',
+    'komoot': 'komoot.com',
+    'laposte': 'laposte.fr',
+    'lastfm': 'last.fm',
+    'lastpass': 'lastpass.com',
+    'mail_ru': 'mail.ru',
+    'mybb': 'community.mybb.com',
+    'myspace': 'myspace.com',
+    'nattyornot': 'nattyornotforum.nattyornot.com',
+    'naturabuy': 'naturabuy.fr',
+    'ndemiccreations': 'forum.ndemiccreations.com',
+    'nextpvr': 'forums.nextpvr.com',
+    'nike': 'nike.com',
+    'nimble': 'nimble.com',
+    'nocrm': 'nocrm.io',
+    'nutshell': 'nutshell.com',
+    'odnoklassniki': 'ok.ru',
+    'office365': 'office365.com',
+    'onlinesequencer': 'onlinesequencer.net',
+    'parler': 'parler.com',
+    'patreon': 'patreon.com',
+    'pinterest': 'pinterest.com',
+    'pipedrive': 'pipedrive.com',
+    'plurk': 'plurk.com',
+    'pornhub': 'pornhub.com',
+    'protonmail': 'protonmail.ch',
+    'quora': 'quora.com',
+    'rambler': 'rambler.ru',
+    'redtube': 'redtube.com',
+    'replit': 'replit.com',
+    'rocketreach': 'rocketreach.co',
+    'samsung': 'samsung.com',
+    'seoclerks': 'seoclerks.com',
+    'sevencups': '7cups.com',
+    'smule': 'smule.com',
+    'snapchat': 'snapchat.com',
+    'soundcloud': 'soundcloud.com',
+    'sporcle': 'sporcle.com',
+    'spotify': 'spotify.com',
+    'strava': 'strava.com',
+    'taringa': 'taringa.net',
+    'teamleader': 'teamleader.eu',
+    'teamtreehouse': 'teamtreehouse.com',
+    'tellonym': 'tellonym.me',
+    'thecardboard': 'thecardboard.org',
+    'therianguide': 'forums.therian-guide.com',
+    'thevapingforum': 'thevapingforum.com',
+    'tumblr': 'tumblr.com',
+    'tunefind': 'tunefind.com',
+    'twitter': 'twitter.com',
+    'venmo': 'venmo.com',
+    'vivino': 'vivino.com',
+    'voxmedia': 'voxmedia.com',
+    'vrbo': 'vrbo.com',
+    'vsco': 'vsco.co',
+    'wattpad': 'wattpad.com',
+    'wordpress': 'wordpress.com',
+    'xing': 'xing.com',
+    'xnxx': 'xnxx.com',
+    'xvideos': 'xvideos.com',
+    'yahoo': 'yahoo.com',
+    'zoho': 'zoho.com',
+}
 
 
 def import_submodules(package, recursive=True):
@@ -61,29 +197,6 @@ def get_functions(modules,args=None):
             else:
                 websites.append(modu.__dict__[site])
     return websites
-
-def check_update():
-    """Check and update holehe if not the last version"""
-    check_version = httpx.get("https://pypi.org/pypi/holehe/json")
-    if check_version.json()["info"]["version"] != __version__:
-        if os.name != 'nt':
-            p = Popen(["pip3",
-                       "install",
-                       "--upgrade",
-                       "holehe"],
-                      stdout=PIPE,
-                      stderr=PIPE)
-        else:
-            p = Popen(["pip",
-                       "install",
-                       "--upgrade",
-                       "holehe"],
-                      stdout=PIPE,
-                      stderr=PIPE)
-        (output, err) = p.communicate()
-        p_status = p.wait()
-        print("Holehe has just been updated, you can restart it.")
-        exit()
 
 def credit():
     """Print Credit"""
@@ -158,26 +271,39 @@ def export_csv(data,args,email):
         timestamp = datetime.timestamp(now)
         name_file="holehe_"+str(round(timestamp))+"_"+email+"_results.csv"
         with open(name_file, 'w', encoding='utf8', newline='') as output_file:
-            fc = csv.DictWriter(output_file,fieldnames=data[0].keys())
+            fc = csv.DictWriter(output_file,
+                                fieldnames=CSV_FIELDNAMES,
+                                extrasaction='ignore',
+                                restval='')
             fc.writeheader()
             fc.writerows(data)
         exit("All results have been exported to "+name_file)
 
-async def launch_module(module,email, client, out):
-    data={'aboutme': 'about.me', 'adobe': 'adobe.com', 'amazon': 'amazon.com', 'anydo': 'any.do', 'archive': 'archive.org', 'armurerieauxerre': 'armurerie-auxerre.com', 'atlassian': 'atlassian.com', 'babeshows': 'babeshows.co.uk', 'badeggsonline': 'badeggsonline.com', 'biosmods': 'bios-mods.com', 'biotechnologyforums': 'biotechnologyforums.com', 'bitmoji': 'bitmoji.com', 'blablacar': 'blablacar.com', 'blackworldforum': 'blackworldforum.com', 'blip': 'blip.fm', 'blitzortung': 'forum.blitzortung.org', 'bluegrassrivals': 'bluegrassrivals.com', 'bodybuilding': 'bodybuilding.com', 'buymeacoffee': 'buymeacoffee.com', 'cambridgemt': 'discussion.cambridge-mt.com', 'caringbridge': 'caringbridge.org', 'chinaphonearena': 'chinaphonearena.com', 'clashfarmer': 'clashfarmer.com', 'codecademy': 'codecademy.com', 'codeigniter': 'forum.codeigniter.com', 'codepen': 'codepen.io', 'coroflot': 'coroflot.com', 'cpaelites': 'cpaelites.com', 'cpahero': 'cpahero.com', 'cracked_to': 'cracked.to', 'crevado': 'crevado.com', 'deliveroo': 'deliveroo.com', 'demonforums': 'demonforums.net', 'devrant': 'devrant.com', 'diigo': 'diigo.com', 'discord': 'discord.com', 'docker': 'docker.com', 'dominosfr': 'dominos.fr', 'ebay': 'ebay.com', 'ello': 'ello.co', 'envato': 'envato.com', 'eventbrite': 'eventbrite.com', 'evernote': 'evernote.com', 'fanpop': 'fanpop.com', 'firefox': 'firefox.com', 'flickr': 'flickr.com', 'freelancer': 'freelancer.com', 'freiberg': 'drachenhort.user.stunet.tu-freiberg.de', 'garmin': 'garmin.com', 'github': 'github.com', 'google': 'google.com', 'gravatar': 'gravatar.com', 'imgur': 'imgur.com', 'instagram': 'instagram.com', 'issuu': 'issuu.com', 'koditv': 'forum.kodi.tv', 'komoot': 'komoot.com', 'laposte': 'laposte.fr', 'lastfm': 'last.fm', 'lastpass': 'lastpass.com', 'mail_ru': 'mail.ru', 'mybb': 'community.mybb.com', 'myspace': 'myspace.com', 'nattyornot': 'nattyornotforum.nattyornot.com', 'naturabuy': 'naturabuy.fr', 'ndemiccreations': 'forum.ndemiccreations.com', 'nextpvr': 'forums.nextpvr.com', 'nike': 'nike.com', 'odnoklassniki': 'ok.ru', 'office365': 'office365.com', 'onlinesequencer': 'onlinesequencer.net', 'parler': 'parler.com', 'patreon': 'patreon.com', 'pinterest': 'pinterest.com', 'plurk': 'plurk.com', 'pornhub': 'pornhub.com', 'protonmail': 'protonmail.ch', 'quora': 'quora.com', 'rambler': 'rambler.ru', 'redtube': 'redtube.com', 'replit': 'replit.com', 'rocketreach': 'rocketreach.co', 'samsung': 'samsung.com', 'seoclerks': 'seoclerks.com', 'sevencups': '7cups.com', 'smule': 'smule.com', 'snapchat': 'snapchat.com', 'soundcloud': 'soundcloud.com', 'sporcle': 'sporcle.com', 'spotify': 'spotify.com', 'strava': 'strava.com', 'taringa': 'taringa.net', 'teamtreehouse': 'teamtreehouse.com', 'tellonym': 'tellonym.me', 'thecardboard': 'thecardboard.org', 'therianguide': 'forums.therian-guide.com', 'thevapingforum': 'thevapingforum.com', 'tumblr': 'tumblr.com', 'tunefind': 'tunefind.com', 'twitter': 'twitter.com', 'venmo': 'venmo.com', 'vivino': 'vivino.com', 'voxmedia': 'voxmedia.com', 'vrbo': 'vrbo.com', 'vsco': 'vsco.co', 'wattpad': 'wattpad.com', 'wordpress': 'wordpress.com', 'xing': 'xing.com', 'xnxx': 'xnxx.com', 'xvideos': 'xvideos.com', 'yahoo': 'yahoo.com','hubspot': 'hubspot.com', 'pipedrive': 'pipedrive.com', 'insightly': 'insightly.com', 'nutshell': 'nutshell.com', 'zoho': 'zoho.com', 'axonaut': 'axonaut.com', 'amocrm': 'amocrm.com', 'nimble': 'nimble.com', 'nocrm': 'nocrm.io', 'teamleader': 'teamleader.eu'}
+async def launch_module(module, email, client, out):
+    """Run one site module, converting any escaped exception into a result row.
+
+    The name is read off the function object rather than parsed out of its repr,
+    and the domain lookup falls back instead of raising -- a KeyError here would
+    surface inside an except handler in a nursery child and abort the whole scan.
+    """
+    name = getattr(module, "__name__", str(module))
     try:
         await module(email, client, out)
-    except Exception:
-        name=str(module).split('<function ')[1].split(' ')[0]
-        out.append({"name": name,"domain":data[name],
+    except Exception as exc:
+        out.append({"name": name,
+                    "domain": MODULE_DOMAINS.get(name, "unknown"),
+                    "method": None,
+                    "frequent_rate_limit": False,
                     "rateLimit": False,
                     "error": True,
                     "exists": False,
                     "emailrecovery": None,
                     "phoneNumber": None,
-                    "others": None})
+                    "others": {"errorMessage": f"{type(exc).__name__}: {exc}"}})
+
+
 async def maincore():
-    parser= ArgumentParser(description=f"holehe v{__version__}")
+    parser = ArgumentParser(description=f"holehe v{__version__}")
     parser.add_argument("email",
                     nargs='+', metavar='EMAIL',
                     help="Target Email")
@@ -194,7 +320,6 @@ async def maincore():
     parser.add_argument("-T","--timeout", type=int , default=10, required=False,dest="timeout",
                     help="Set max timeout value (default 10)")
 
-    check_update()
     args = parser.parse_args()
     credit()
     email=args.email[0]
