@@ -1,0 +1,105 @@
+# crm -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: amocrm
+  domain: amocrm.com
+  category: crm
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: axonaut
+  domain: axonaut.com
+  category: crm
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: hubspot
+  domain: hubspot.com
+  category: crm
+  method: login
+  plugin: legacy
+  side_effect: failed_login
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: insightly
+  domain: insightly.com
+  category: crm
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://accounts.insightly.com/signup/isemailvalid
+      headers:
+        Accept: "application/json, text/javascript, */*; q=0.01"
+        Content-Type: "application/x-www-form-urlencoded; charset=UTF-8"
+        X-Requested-With: XMLHttpRequest
+        Origin: https://accounts.insightly.com
+        Referer: "https://accounts.insightly.com/?plan=trial"
+      body:
+        form: { emailaddress: "{email}" }
+  rules:
+    - when:
+        body: { contains: "An account exists for this address. Use another address or" }
+      then: registered
+    - when: { body: { equals: "true" } }
+      then: not_registered
+  canary: { tier: c, discriminating: "yes" }
+
+- id: nimble
+  domain: nimble.com
+  category: crm
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: nocrm
+  domain: nocrm.io
+  category: crm
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: endpoint_gone, measured: 2026-08-18, http_code: 404 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: nutshell
+  domain: nutshell.com
+  category: crm
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: pipedrive
+  domain: pipedrive.com
+  category: crm
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: teamleader
+  domain: teamleader.eu
+  category: crm
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: zoho
+  domain: zoho.com
+  category: crm
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }

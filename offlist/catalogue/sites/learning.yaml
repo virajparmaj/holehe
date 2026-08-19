@@ -1,0 +1,51 @@
+# learning -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: diigo
+  domain: diigo.com
+  category: learning
+  method: register
+  steps:
+    - id: check
+      method: GET
+      url: https://www.diigo.com/user_mana2/check_email
+      params: { email: "{email}" }
+      headers:
+        Accept: "*/*"
+        Referer: "https://www.diigo.com/sign-up?plan=free"
+        X-Requested-With: XMLHttpRequest
+  rules:
+    # The endpoint answers with a bare "0" (taken) or "1" (free). Anything else
+    # is an error page, and reports parse_failed rather than "no account".
+    - when: { status: { eq: 200 }, body: { equals: "0" } }
+      then: registered
+    - when: { status: { eq: 200 }, body: { equals: "1" } }
+      then: not_registered
+  canary: { tier: c, discriminating: "yes" }
+
+- id: duolingo
+  domain: duolingo.com
+  category: learning
+  method: public_lookup
+  steps:
+    - id: check
+      method: GET
+      url: https://www.duolingo.com/2017-06-30/users
+      params: { email: "{email}" }
+      headers:
+        Accept: "application/json, text/plain, */*"
+        Accept-Language: "en-US,en;q=0.8"
+  rules:
+    - when: { json: { path: users, truthy: true } }
+      then: registered
+    - when: { json: { path: users, exists: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "yes" }
+
+- id: quora
+  domain: quora.com
+  category: learning
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }

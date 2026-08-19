@@ -1,0 +1,80 @@
+# shopping -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: amazon
+  domain: amazon.com
+  category: shopping
+  method: login
+  plugin: legacy
+  side_effect: failed_login
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: armurerieauxerre
+  domain: armurerie-auxerre.com
+  category: shopping
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: deliveroo
+  domain: deliveroo.com
+  category: shopping
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: unreachable, measured: 2026-08-18 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: dominosfr
+  domain: dominos.fr
+  category: shopping
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: ebay
+  domain: ebay.com
+  category: shopping
+  method: login
+  plugin: legacy
+  side_effect: failed_login
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: envato
+  domain: envato.com
+  category: shopping
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: garmin
+  domain: garmin.com
+  category: shopping
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: naturabuy
+  domain: naturabuy.fr
+  category: shopping
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: vivino
+  domain: vivino.com
+  category: shopping
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }

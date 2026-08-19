@@ -1,0 +1,87 @@
+# software -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: adobe
+  domain: adobe.com
+  category: software
+  method: password_recovery
+  plugin: legacy
+  side_effect: sends_email
+  canary: { tier: c, discriminating: "yes" }
+
+- id: archive
+  domain: archive.org
+  category: software
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: docker
+  domain: docker.com
+  category: software
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: firefox
+  domain: firefox.com
+  category: software
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://api.accounts.firefox.com/v1/account/status
+      headers:
+        Accept: application/json
+        # This API answers 406 to browser-looking user agents; an honest
+        # non-browser UA is what actually gets a response.
+        User-Agent: "offlist/2.0 (+https://github.com/virajparmaj/holehe)"
+      body:
+        form: { email: "{email}" }
+  rules:
+    - when: { json: { path: exists, equals: true } }
+      then: registered
+    - when: { json: { path: exists, equals: false } }
+      then: not_registered
+  canary: { tier: c, discriminating: "yes" }
+
+- id: issuu
+  domain: issuu.com
+  category: software
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: server_error, measured: 2026-08-18, http_code: 503 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: lastpass
+  domain: lastpass.com
+  category: software
+  method: register
+  steps:
+    - id: check
+      method: GET
+      url: https://lastpass.com/create_account.php
+      params:
+        check: avail
+        skipcontent: "1"
+        mistype: "1"
+        username: "{email}"
+      headers:
+        Accept: "*/*"
+        Referer: https://lastpass.com/
+        X-Requested-With: XMLHttpRequest
+  rules:
+    - when: { body: { equals: "no" } }
+      then: registered
+    - when: { body: { in: ["ok", "emailinvalid"] } }
+      then: not_registered
+  canary: { tier: c, discriminating: "yes" }
+
+- id: office365
+  domain: office365.com
+  category: software
+  method: other
+  plugin: legacy
+  canary: { tier: c, discriminating: "yes" }

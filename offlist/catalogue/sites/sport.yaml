@@ -1,0 +1,10 @@
+# sport -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: bodybuilding
+  domain: bodybuilding.com
+  category: sport
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }

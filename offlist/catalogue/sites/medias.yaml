@@ -1,0 +1,86 @@
+# medias -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: ello
+  domain: ello.co
+  category: medias
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: server_error, measured: 2026-08-18, http_code: 520 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: flickr
+  domain: flickr.com
+  category: medias
+  method: login
+  steps:
+    - id: check
+      method: GET
+      url: https://identity-api.flickr.com/migration
+      params: { email: "{email}" }
+      headers:
+        Accept: "*/*"
+        Referer: https://identity.flickr.com/login
+        Origin: https://identity.flickr.com
+  # The original module mapped state_code == "5" to "account exists". Measured
+  # 2026-08-18, that response also carries state_desc: "NEW_USER", and a
+  # fabricated address returns {"stat":"fail","code":11} rather than a clean
+  # negative. So the original mapping looks inverted and the endpoint cannot
+  # currently produce a trustworthy negative. Disabled until a known-registered
+  # Flickr address is available to establish the true mapping.
+  enabled: false
+  disabled:
+    status: parse_failed
+    measured: 2026-08-18
+    note: "state_code=5 reports state_desc=NEW_USER; original exists-mapping is probably inverted"
+  rules:
+    - when: { json: { path: state_desc, equals: "NEW_USER" } }
+      then: not_registered
+    - when: { json: { path: state_code, exists: true } }
+      then: registered
+  canary: { tier: c, discriminating: unverified }
+
+- id: komoot
+  domain: komoot.com
+  category: medias
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: rambler
+  domain: rambler.ru
+  category: medias
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://id.rambler.ru/jsonrpc
+      headers:
+        Accept: "*/*"
+        Content-Type: application/json
+        Referer: https://id.rambler.ru/champ/registration
+        Origin: https://id.rambler.ru
+      body:
+        json:
+          method: "Rambler::Id::get_email_account_info"
+          params:
+            - { email: "{email}" }
+          rpc: "2.0"
+  rules:
+    - when: { json: { path: "result.exists", equals: 0 } }
+      then: not_registered
+    - when: { json: { path: "result.exists", exists: true } }
+      then: registered
+  canary: { tier: c, discriminating: "yes" }
+
+- id: sporcle
+  domain: sporcle.com
+  category: medias
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }

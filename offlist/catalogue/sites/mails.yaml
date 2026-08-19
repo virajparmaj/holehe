@@ -1,0 +1,45 @@
+# mails -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: google
+  domain: google.com
+  category: mails
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: laposte
+  domain: laposte.fr
+  category: mails
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: mail_ru
+  domain: mail.ru
+  category: mails
+  method: password_recovery
+  plugin: legacy
+  side_effect: sends_email
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: protonmail
+  domain: protonmail.ch
+  category: mails
+  method: other
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: yahoo
+  domain: yahoo.com
+  category: mails
+  method: login
+  plugin: legacy
+  side_effect: failed_login
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }

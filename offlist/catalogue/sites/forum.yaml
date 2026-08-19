@@ -1,0 +1,207 @@
+# forum -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: babeshows
+  domain: babeshows.co.uk
+  engine: mybb
+  vars: { base_url: "https://www.babeshows.co.uk" }
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: badeggsonline
+  domain: badeggsonline.com
+  engine: mybb
+  vars: { base_url: "https://www.badeggsonline.com/beo2-forum" }
+  enabled: false
+  disabled: { status: unreachable, measured: 2026-08-18 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: biosmods
+  domain: bios-mods.com
+  engine: mybb
+  vars: { base_url: "https://bios-mods.com/forum" }
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: biotechnologyforums
+  domain: biotechnologyforums.com
+  engine: mybb
+  vars: { base_url: "https://biotechnologyforums.com" }
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: blackworldforum
+  domain: blackworldforum.com
+  engine: mybb
+  vars: { base_url: "http://blackworldforum.com" }
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: blitzortung
+  domain: forum.blitzortung.org
+  engine: mybb
+  vars: { base_url: "https://forum.blitzortung.org" }
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: bluegrassrivals
+  domain: bluegrassrivals.com
+  engine: mybb
+  vars: { base_url: "http://bluegrassrivals.com/forum" }
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: cambridgemt
+  domain: discussion.cambridge-mt.com
+  engine: mybb
+  vars: { base_url: "https://discussion.cambridge-mt.com" }
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: chinaphonearena
+  domain: chinaphonearena.com
+  engine: mybb
+  vars: { base_url: "https://www.chinaphonearena.com/forum" }
+  enabled: false
+  disabled: { status: unreachable, measured: 2026-08-18 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: clashfarmer
+  domain: clashfarmer.com
+  engine: mybb
+  vars: { base_url: "https://www.clashfarmer.com/forum" }
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: server_error, measured: 2026-08-18, http_code: 503 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: codeigniter
+  domain: forum.codeigniter.com
+  engine: mybb
+  vars: { base_url: "https://forum.codeigniter.com" }
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: cpaelites
+  domain: cpaelites.com
+  engine: mybb
+  vars: { base_url: "https://www.cpaelites.com" }
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: cpahero
+  domain: cpahero.com
+  engine: mybb
+  vars: { base_url: "https://www.cpahero.com" }
+  enabled: false
+  disabled: { status: unreachable, measured: 2026-08-18 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: cracked_to
+  domain: cracked.to
+  engine: mybb
+  vars: { base_url: "https://cracked.to" }
+  frequent_rate_limit: true
+  timeout: 1
+  enabled: false
+  disabled: { status: unreachable, measured: 2026-08-18 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: demonforums
+  domain: demonforums.net
+  engine: mybb
+  vars: { base_url: "https://demonforums.net" }
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: freiberg
+  domain: drachenhort.user.stunet.tu-freiberg.de
+  engine: mybb
+  vars: { base_url: "https://drachenhort.user.stunet.tu-freiberg.de" }
+  enabled: false
+  disabled: { status: endpoint_gone, measured: 2026-08-18, http_code: 404 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: koditv
+  domain: forum.kodi.tv
+  engine: mybb
+  vars: { base_url: "https://forum.kodi.tv" }
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: mybb
+  domain: community.mybb.com
+  engine: mybb
+  vars: { base_url: "https://community.mybb.com" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: nattyornot
+  domain: nattyornotforum.nattyornot.com
+  engine: mybb
+  vars: { base_url: "https://nattyornotforum.nattyornot.com" }
+  enabled: false
+  disabled: { status: unreachable, measured: 2026-08-18 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: ndemiccreations
+  domain: forum.ndemiccreations.com
+  engine: mybb
+  vars: { base_url: "https://forum.ndemiccreations.com" }
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: nextpvr
+  domain: forums.nextpvr.com
+  engine: mybb
+  vars: { base_url: "https://forums.nextpvr.com" }
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: onlinesequencer
+  domain: onlinesequencer.net
+  engine: mybb
+  vars: { base_url: "https://onlinesequencer.net/forum" }
+  timeout: 1
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: thecardboard
+  domain: thecardboard.org
+  engine: mybb
+  vars: { base_url: "https://thecardboard.org/board" }
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: therianguide
+  domain: forums.therian-guide.com
+  engine: mybb
+  vars: { base_url: "https://forums.therian-guide.com" }
+  enabled: false
+  disabled: { status: rate_limited, measured: 2026-08-18, http_code: 429 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: thevapingforum
+  domain: thevapingforum.com
+  engine: mybb
+  vars: { base_url: "http://www.thevapingforum.com" }
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }

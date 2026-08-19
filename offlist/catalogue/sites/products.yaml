@@ -1,0 +1,30 @@
+# products -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: eventbrite
+  domain: eventbrite.com
+  category: products
+  method: login
+  plugin: legacy
+  side_effect: failed_login
+  canary: { tier: c, discriminating: "yes" }
+
+- id: nike
+  domain: nike.com
+  category: products
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: unreachable, measured: 2026-08-18 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: samsung
+  domain: samsung.com
+  category: products
+  method: password_recovery
+  plugin: legacy
+  side_effect: sends_email
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
