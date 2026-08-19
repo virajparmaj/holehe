@@ -1,0 +1,31 @@
+# Tier B: addresses known to be registered without us registering anything.
+#
+# test@gmail.com is one of the most widely signed-up addresses on the internet.
+# It is not proof on its own -- Flickr is the cautionary example, where a
+# "registered" verdict turned out to mean state_desc: NEW_USER. What makes it
+# usable is the pairing: the canary requires the positive to come back
+# `registered` AND a freshly fabricated address to come back `not_registered`.
+# A site that cannot produce a clean negative fails, whatever it says about the
+# positive.
+#
+# Re-verify provenance periodically; accounts get deleted.
+sites:
+  anydo: test@gmail.com
+  codepen: test@gmail.com
+  devrant: test@gmail.com
+  diigo: test@gmail.com
+  duolingo: test@gmail.com
+  eventbrite: test@gmail.com
+  freelancer: test@gmail.com
+  insightly: test@gmail.com
+  lastpass: test@gmail.com
+  office365: test@gmail.com
+  plurk: test@gmail.com
+  rambler: test@gmail.com
+  replit: test@gmail.com
+  seoclerks: test@gmail.com
+  teamtreehouse: test@gmail.com
+  twitter: test@gmail.com
+  xnxx: test@gmail.com
+  xvideos: test@gmail.com
+  firefox: test@gmail.com

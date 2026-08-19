@@ -1,0 +1,51 @@
+name: tests
+
+on:
+  push:
+    branches: [master, "rebuild/**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      # Entirely offline. Live checks belong in `offlist canary`, run from a
+      # residential IP -- CI runner ranges are WAF-listed, so a nightly live run
+      # here would produce red builds that nobody reads.
+      - name: Test
+        run: pytest -q -m "not live"
+
+  packaging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build
+      - name: Build the wheel
+        run: python -m build --wheel
+      - name: The catalogue must be inside the wheel
+        # include_package_data without MANIFEST.in silently shipped nothing, and
+        # everything still worked from a git checkout. This is the tripwire.
+        run: |
+          set -euo pipefail
+          count=$(python -c "
+          import glob, zipfile
+          names = zipfile.ZipFile(glob.glob('dist/*.whl')[0]).namelist()
+          print(sum(1 for n in names if 'catalogue/sites/' in n and n.endswith('.yaml')))
+          ")
+          echo "site definitions in wheel: $count"
+          test "$count" -gt 0

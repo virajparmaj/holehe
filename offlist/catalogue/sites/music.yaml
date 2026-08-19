@@ -1,0 +1,57 @@
+# music -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: blip
+  domain: blip.fm
+  category: music
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: lastfm
+  domain: last.fm
+  category: music
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: smule
+  domain: smule.com
+  category: music
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: soundcloud
+  domain: soundcloud.com
+  category: music
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 307 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: spotify
+  domain: spotify.com
+  category: music
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: tunefind
+  domain: tunefind.com
+  category: music
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: endpoint_gone, measured: 2026-08-18, http_code: 404 }
+  canary: { tier: c, discriminating: "unverified" }

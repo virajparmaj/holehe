@@ -1,0 +1,21 @@
+# medical -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: caringbridge
+  domain: caringbridge.org
+  category: medical
+  method: register
+  plugin: legacy
+  timeout: 3
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: sevencups
+  domain: 7cups.com
+  category: medical
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }

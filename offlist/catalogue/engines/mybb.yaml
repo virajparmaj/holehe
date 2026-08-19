@@ -1,0 +1,61 @@
+id: mybb
+description: >
+  MyBB forums expose an email-availability XHR that needs a post key lifted out
+  of the registration page first. Twenty-five of the original modules were
+  byte-identical implementations of this, differing only in a base URL.
+defaults:
+  category: forum
+  method: register
+  member_path: /member.php
+  xmlhttp_path: /xmlhttp.php
+  taken_string: "email address that is already in use by another member."
+  blocked_string: "Your request was blocked"
+
+steps:
+  - id: bootstrap
+    method: GET
+    url: "{base_url}{member_path}"
+    headers:
+      Accept: "application/json, text/javascript, */*; q=0.01"
+      Accept-Language: "en,en-US;q=0.5"
+      Referer: "{base_url}{member_path}"
+      DNT: "1"
+    guards:
+      - when: { body: { contains: "{blocked_string}" } }
+        then: blocked
+      - when: { status: { ne: 200 } }
+        then: from_status
+    capture:
+      post_key:
+        from: body
+        via: between
+        start: 'var my_post_key = "'
+        end: '"'
+        on_missing: parse_failed
+
+  - id: check
+    method: POST
+    url: "{base_url}{xmlhttp_path}"
+    params:
+      action: email_availability
+    headers:
+      X-Requested-With: XMLHttpRequest
+      Content-Type: "application/x-www-form-urlencoded; charset=UTF-8"
+      Accept: "application/json, text/javascript, */*; q=0.01"
+      Origin: "{base_url}"
+      Referer: "{base_url}{member_path}"
+    body:
+      form:
+        email: "{email}"
+        my_post_key: "{captured.post_key}"
+
+rules:
+  - when: { body: { contains: "{blocked_string}" } }
+    then: blocked
+  - when: { status: { ne: 200 } }
+    then: from_status
+  - when: { body: { contains: "{taken_string}" } }
+    then: registered
+  # An explicit else: the negative here is a real observed response shape, not a
+  # fallthrough, which is what makes a negative-only canary meaningful for MyBB.
+  - else: not_registered

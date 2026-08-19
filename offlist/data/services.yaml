@@ -1,0 +1,83 @@
+# Canonical service <- domain aliases. One entry per thing you actually delete an
+# account at, so evidence about several domains collapses into one worklist item.
+services:
+  california_drop:
+    display_name: California data-broker registry (all remaining brokers)
+    category: data_broker
+    domains: [privacy.ca.gov]
+  github:
+    display_name: GitHub
+    category: programing
+    domains: [github.com]
+  google:
+    display_name: Google
+    category: identity
+    domains: [google.com, gmail.com, youtube.com, googlemail.com]
+  microsoft:
+    display_name: Microsoft
+    category: identity
+    domains: [microsoft.com, office365.com, live.com, outlook.com, hotmail.com]
+  meta_facebook:
+    display_name: Facebook (Meta)
+    category: social
+    domains: [facebook.com]
+  meta_instagram:
+    display_name: Instagram (Meta)
+    category: social
+    domains: [instagram.com]
+  x_twitter:
+    display_name: X (formerly Twitter)
+    category: social
+    domains: [twitter.com, x.com]
+  adobe:
+    display_name: Adobe
+    category: software
+    domains: [adobe.com]
+  amazon:
+    display_name: Amazon
+    category: shopping
+    domains: [amazon.com]
+  gravatar:
+    display_name: Gravatar (Automattic)
+    category: identity
+    domains: [gravatar.com, en.gravatar.com]
+  wordpress:
+    display_name: WordPress.com (Automattic)
+    category: cms
+    domains: [wordpress.com]
+  spokeo:
+    display_name: Spokeo
+    category: data_broker
+    domains: [spokeo.com]
+  beenverified:
+    display_name: BeenVerified
+    category: data_broker
+    domains: [beenverified.com]
+  radaris:
+    display_name: Radaris
+    category: data_broker
+    domains: [radaris.com]
+  whitepages:
+    display_name: Whitepages
+    category: data_broker
+    domains: [whitepages.com]
+  intelius:
+    display_name: Intelius
+    category: data_broker
+    domains: [intelius.com]
+  peoplefinders:
+    display_name: PeopleFinders
+    category: data_broker
+    domains: [peoplefinders.com]
+  mylife:
+    display_name: MyLife
+    category: data_broker
+    domains: [mylife.com]
+  acxiom:
+    display_name: Acxiom (LiveRamp)
+    category: data_broker
+    domains: [acxiom.com, liveramp.com]
+  lexisnexis:
+    display_name: LexisNexis Risk Solutions
+    category: data_broker
+    domains: [lexisnexis.com, risk.lexisnexis.com]

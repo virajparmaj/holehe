@@ -1,0 +1,53 @@
+# porn -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: pornhub
+  domain: pornhub.com
+  category: porn
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: endpoint_gone, measured: 2026-08-18, http_code: 404 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: redtube
+  domain: redtube.com
+  category: porn
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: xnxx
+  domain: xnxx.com
+  category: porn
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  canary: { tier: c, discriminating: "yes" }
+
+- id: xvideos
+  domain: xvideos.com
+  category: porn
+  method: register
+  steps:
+    - id: check
+      method: GET
+      url: https://www.xvideos.com/account/checkemail
+      params: { email: "{email}" }
+      headers:
+        Accept: "application/json, text/javascript, */*; q=0.01"
+        X-Requested-With: XMLHttpRequest
+        Referer: https://www.xvideos.com/
+  rules:
+    - when:
+        all:
+          - json: { path: result, equals: false }
+          - body:
+              contains: "This email is already in use or its owner has excluded it from our website"
+      then: registered
+    - when: { json: { path: result, exists: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "yes" }

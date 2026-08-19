@@ -28,6 +28,7 @@ async def strava(email, client, out):
                     "emailrecovery": None,
                     "phoneNumber": None,
                     "others": None})
+        return None
     headers['X-Requested-With'] = 'XMLHttpRequest'
 
     params = {

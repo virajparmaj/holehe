@@ -1,0 +1,288 @@
+# Measured per-site state. Written by `offlist canary`; do not hand-edit.
+# `discriminating` is what downgrades an uninformative negative to
+# INDETERMINATE at report time.
+sites:
+  adobe:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  amazon:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  anydo:
+    canary_tier: a
+    consecutive_failures: 1
+    discriminating: unverified
+    first_failed: '2026-08-18'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+    note: known-positive returned not_registered
+  archive:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  armurerieauxerre:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  axonaut:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  blip:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  bodybuilding:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  caringbridge:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  codepen:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  coroflot:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  devrant:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  diigo:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  docker:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  dominosfr:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  duolingo:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  envato:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  eventbrite:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  fanpop:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  firefox:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  freelancer:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  gravatar:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  insightly:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  laposte:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  lastfm:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  lastpass:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  mail_ru:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  mybb:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  naturabuy:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  office365:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  parler:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  plurk:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  protonmail:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  quora:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  rambler:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  replit:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  seoclerks:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  sporcle:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  taringa:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  teamtreehouse:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  tellonym:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  twitter:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  wattpad:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  wordpress:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  xnxx:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  xvideos:
+    canary_tier: a
+    consecutive_failures: 0
+    discriminating: 'yes'
+    last_checked: '2026-08-18'
+    last_status: not_registered
+  zoho:
+    canary_tier: c
+    consecutive_failures: 0
+    discriminating: unverified
+    last_checked: '2026-08-18'
+    last_status: not_registered

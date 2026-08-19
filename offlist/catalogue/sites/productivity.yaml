@@ -1,0 +1,37 @@
+# productivity -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: anydo
+  domain: any.do
+  category: productivity
+  method: login
+  frequent_rate_limit: true
+  steps:
+    - id: check
+      method: POST
+      url: https://sm-prod2.any.do/check_email
+      headers:
+        Accept: "*/*"
+        Content-Type: "application/json; charset=UTF-8"
+        X-Platform: "3"
+        Referer: https://desktop.any.do/
+        Origin: https://desktop.any.do
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { status: { eq: 200 }, json: { path: user_exists, equals: true } }
+      then: registered
+    - when: { status: { eq: 200 }, json: { path: user_exists, equals: false } }
+      then: not_registered
+  canary: { tier: c, discriminating: "yes" }
+
+- id: evernote
+  domain: evernote.com
+  category: productivity
+  method: login
+  plugin: legacy
+  side_effect: failed_login
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }

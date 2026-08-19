@@ -1,0 +1,28 @@
+name: canary (manual)
+
+# Deliberately not on a schedule. GitHub runner IPs are WAF-listed, so a nightly
+# live scan produces failures that say more about the runner than the catalogue.
+# The authoritative canary run is `offlist canary --write-ledger` from a
+# residential connection; this workflow exists for one-off checks.
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "restrict to a site id or category"
+        required: false
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - name: Canary
+        continue-on-error: true
+        run: |
+          offlist canary \
+            --positives offlist/catalogue/canary/public_positives.yaml \
+            ${{ inputs.only && format('--only {0}', inputs.only) || '' }}

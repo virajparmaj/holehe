@@ -1,0 +1,12 @@
+# osint -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: rocketreach
+  domain: rocketreach.co
+  category: osint
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: endpoint_gone, measured: 2026-08-18, http_code: 404 }
+  canary: { tier: c, discriminating: "unverified" }

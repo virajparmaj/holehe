@@ -19,9 +19,9 @@ async def venmo(email, client, out):
         'Connection': 'keep-alive',
         'TE': 'Trailers',
     }
-    await client.get("https://venmo.com/signup/email", headers=headers)
+    signup = await client.get("https://venmo.com/signup/email", headers=headers)
     try:
-        headers["device-id"] = s.cookies["v_id"]
+        headers["device-id"] = signup.cookies["v_id"]
     except Exception:
         out.append({"name": name,"domain":domain,"method":method,"frequent_rate_limit":frequent_rate_limit,
                     "rateLimit": True,

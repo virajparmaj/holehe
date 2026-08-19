@@ -1,0 +1,226 @@
+# social_media -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: bitmoji
+  domain: bitmoji.com
+  category: social_media
+  method: login
+  plugin: legacy
+  side_effect: failed_login
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: crevado
+  domain: crevado.com
+  category: social_media
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: unreachable, measured: 2026-08-18 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: discord
+  domain: discord.com
+  category: social_media
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 400 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: facebook
+  domain: facebook.com
+  category: social_media
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: fanpop
+  domain: fanpop.com
+  category: social_media
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: imgur
+  domain: imgur.com
+  category: social_media
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 412 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: instagram
+  domain: instagram.com
+  category: social_media
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: myspace
+  domain: myspace.com
+  category: social_media
+  method: register
+  plugin: legacy
+  timeout: 2
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: odnoklassniki
+  domain: ok.ru
+  category: social_media
+  method: password_recovery
+  plugin: legacy
+  side_effect: sends_email
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: parler
+  domain: parler.com
+  category: social_media
+  method: login
+  plugin: legacy
+  side_effect: failed_login
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: patreon
+  domain: patreon.com
+  category: social_media
+  method: login
+  plugin: legacy
+  side_effect: failed_login
+  frequent_rate_limit: true
+  enabled: false
+  disabled: { status: endpoint_gone, measured: 2026-08-18, http_code: 404 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: pinterest
+  domain: pinterest.com
+  category: social_media
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: plurk
+  domain: plurk.com
+  category: social_media
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.plurk.com/Users/isEmailFound
+      headers:
+        Accept: "*/*"
+        Content-Type: "application/x-www-form-urlencoded; charset=UTF-8"
+        X-Requested-With: XMLHttpRequest
+        Origin: https://www.plurk.com
+      body:
+        form: { email: "{email}" }
+  rules:
+    - when: { body: { equals: "True" } }
+      then: registered
+    - when: { body: { equals: "False" } }
+      then: not_registered
+  canary: { tier: c, discriminating: "yes" }
+
+- id: snapchat
+  domain: snapchat.com
+  category: social_media
+  method: login
+  plugin: legacy
+  side_effect: failed_login
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: strava
+  domain: strava.com
+  category: social_media
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: endpoint_gone, measured: 2026-08-18, http_code: 404 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: taringa
+  domain: taringa.net
+  category: social_media
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: tellonym
+  domain: tellonym.me
+  category: social_media
+  method: register
+  plugin: legacy
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: tumblr
+  domain: tumblr.com
+  category: social_media
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: parse_failed, measured: 2026-08-18, http_code: 200 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: twitter
+  domain: twitter.com
+  category: social_media
+  method: register
+  steps:
+    - id: check
+      method: GET
+      url: https://api.twitter.com/i/users/email_available.json
+      params: { email: "{email}" }
+      headers:
+        Accept: "application/json, text/plain, */*"
+  rules:
+    - when: { json: { path: taken, equals: true } }
+      then: registered
+    - when: { json: { path: taken, equals: false } }
+      then: not_registered
+  canary: { tier: c, discriminating: "yes" }
+
+- id: vsco
+  domain: vsco.co
+  category: social_media
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-18, http_code: 403 }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: wattpad
+  domain: wattpad.com
+  category: social_media
+  method: register
+  plugin: legacy
+  frequent_rate_limit: true
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: xing
+  domain: xing.com
+  category: social_media
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: endpoint_gone, measured: 2026-08-18, http_code: 404 }
+  canary: { tier: c, discriminating: "unverified" }

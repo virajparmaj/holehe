@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "offlist"
+dynamic = ["version"]
+description = "Find which services hold your email address, and get a worklist for making them delete it."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "virajparmaj" }]
+keywords = ["privacy", "gdpr", "ccpa", "data-broker", "email", "osint"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Topic :: Security",
+    "Environment :: Console",
+]
+dependencies = [
+    "httpx[brotli]>=0.24",
+    "beautifulsoup4>=4.11",
+    "PyYAML>=6.0",
+    "tldextract>=3.4",
+    "tqdm>=4.64",
+    "termcolor>=2.0",
+    "colorama>=0.4",
+    # legacy holehe module tree; dropped once the port to the catalogue completes
+    "trio>=0.22",
+]
+
+[project.optional-dependencies]
+# One-click unsubscribe is refused unless a DKIM signature can actually be
+# verified, so without these the feature degrades to "refused with an
+# explanation" rather than to "sent unchecked".
+dkim = [
+    "dkimpy>=1.0",
+    "cryptography>=41.0",
+]
+dev = [
+    "dkimpy>=1.0",
+    "cryptography>=41.0",
+    "pytest>=7.4",
+    "pytest-asyncio>=0.23",
+    "respx>=0.20",
+    "build>=1.0",
+]
+
+[project.scripts]
+offlist = "offlist.cli.main:main"
+holehe = "holehe.core:main"
+
+[project.urls]
+Homepage = "https://github.com/virajparmaj/holehe"
+
+[tool.setuptools.dynamic]
+version = { attr = "offlist.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["offlist*", "holehe*"]
+
+# Without this the catalogue YAML works from a git checkout and is silently
+# absent from the wheel. tests/test_packaging.py asserts it is present.
+[tool.setuptools.package-data]
+offlist = ["catalogue/**/*.yaml", "catalogue/**/*.yml", "data/**/*.yaml", "data/**/*.csv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "live: hits the real network; deselected by default in CI",
+    "slow: builds artefacts or is otherwise expensive",
+]

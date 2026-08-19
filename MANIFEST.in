@@ -1,0 +1,6 @@
+include LICENSE.md
+include README.md
+recursive-include offlist/catalogue *.yaml *.yml
+recursive-include offlist/data *.yaml *.csv
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

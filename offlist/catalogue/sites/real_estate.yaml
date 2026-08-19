@@ -1,0 +1,12 @@
+# real_estate -- generated from the legacy module tree on 2026-08-18.
+# `enabled: false` records what the site actually did when measured;
+# `plugin: legacy` marks entries not yet ported to declarative steps.
+
+- id: vrbo
+  domain: vrbo.com
+  category: real_estate
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: rate_limited, measured: 2026-08-18, http_code: 429 }
+  canary: { tier: c, discriminating: "unverified" }
