@@ -81,3 +81,19 @@ services:
     display_name: LexisNexis Risk Solutions
     category: data_broker
     domains: [lexisnexis.com, risk.lexisnexis.com]
+  instantcheckmate:
+    display_name: Instant Checkmate
+    category: data_broker
+    domains: [instantcheckmate.com]
+  truthfinder:
+    display_name: TruthFinder
+    category: data_broker
+    domains: [truthfinder.com]
+  socialcatfish:
+    display_name: Social Catfish
+    category: data_broker
+    domains: [socialcatfish.com]
+  nuwber:
+    display_name: Nuwber
+    category: data_broker
+    domains: [nuwber.com]

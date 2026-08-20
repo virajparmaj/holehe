@@ -84,3 +84,24 @@ def test_service_names_are_slugged_safely(tmp_path):
     path = letters.write(rec, EMAIL, tmp_path, today=TODAY)
     assert path.parent == tmp_path
     assert "/" not in path.name.replace("-deletion-request.txt", "")
+
+
+def test_broker_letter_adds_the_right_of_access_items():
+    """A data-broker record asks for confirmation of processing and the access
+    items -- source, recipients, retention -- not just deletion."""
+    rec = a_record(why_flagged=["data_broker"])
+    text = letters.compose(rec, EMAIL, jurisdiction="EU", today=TODAY)
+    assert "right of access" in text
+    assert "confirm whether you are processing" in text
+    for item in ("the source", "categories of recipients",
+                 "retention period", "profile, or listing identifier"):
+        assert item in text
+    assert text.startswith("To: privacy@mylife.com")
+    assert "Subject: Access and deletion request" in text
+
+
+def test_non_broker_letter_stays_deletion_only():
+    rec = a_record(why_flagged=["dormant"])
+    text = letters.compose(rec, EMAIL, jurisdiction="EU", today=TODAY)
+    assert "right of access" not in text
+    assert "Subject: Data deletion request" in text

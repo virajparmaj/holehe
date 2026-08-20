@@ -94,9 +94,13 @@ def compose(record: ServiceRecord, email: EmailAddress, *,
                  f"your jurisdiction, so this is a request you may decline.")
         timing = (f"I would appreciate a reply by {deadline.isoformat()}.")
 
+    is_broker = "data_broker" in (record.why_flagged or [])
+    subject = ("Access and deletion request" if is_broker
+               else "Data deletion request")
+
     lines = [
         f"To: {contact}",
-        f"Subject: Data deletion request - {email.raw}",
+        f"Subject: {subject} - {email.raw}",
         "",
         f"Date: {today.isoformat()}",
         "",
@@ -114,6 +118,28 @@ def compose(record: ServiceRecord, email: EmailAddress, *,
         "  3. Instruct any third parties you sold or shared that data with to do the same.",
         "  4. Stop sending me marketing of any kind.",
         "",
+    ]
+
+    # Data brokers profile people who never signed up, so the question that
+    # matters is often "are you processing my data at all", not "close my
+    # account". Ask for confirmation of processing and the access items the
+    # statutory right of access covers, alongside the deletion above.
+    if is_broker:
+        lines += [
+            "As a data broker you may hold information about me without my ever "
+            "having had a direct relationship with you. I therefore also exercise "
+            "my right of access. Please confirm whether you are processing personal "
+            "information relating to this address and, if so, provide:",
+            "  a. a copy of that information;",
+            "  b. the source or sources from which you obtained it;",
+            "  c. the purposes for which you process it;",
+            "  d. the categories of recipients you have sold or disclosed it to;",
+            "  e. the applicable retention period, or the criteria used to set it; and",
+            "  f. any account, profile, or listing identifier associated with this address.",
+            "",
+        ]
+
+    lines += [
         timing,
         "",
     ]

@@ -121,6 +121,59 @@ services:
     estimated_effort_minutes: 20
     verified: 2026-08-18
 
+  socialcatfish:
+    kind: opt_out_form
+    url: https://socialcatfish.com/opt-out/
+    requires_identity_proof: false
+    requires_email_confirmation: true
+    drop_covered: true
+    estimated_effort_minutes: 5
+    recheck_after_days: 45
+    notes: >
+      Pick your state, enter name and email, submit. The site says a record is
+      removed from sale within 15 days.
+    source: yaelwrites/Big-Ass-Data-Broker-Opt-Out-List
+    verified: 2026-08-20
+
+  instantcheckmate:
+    kind: opt_out_form
+    url: https://www.instantcheckmate.com/opt-out/
+    requires_email_confirmation: true
+    drop_covered: true
+    estimated_effort_minutes: 10
+    recheck_after_days: 45
+    notes: >
+      Search for the record, select it, confirm by email. URL from the community
+      opt-out list; the broker returns 403 to automated checks, so it was not
+      auto-verified -- open it in a browser before relying on it.
+    source: yaelwrites/Big-Ass-Data-Broker-Opt-Out-List
+
+  truthfinder:
+    kind: opt_out_form
+    url: https://www.truthfinder.com/opt-out/
+    requires_email_confirmation: true
+    drop_covered: true
+    estimated_effort_minutes: 10
+    recheck_after_days: 45
+    notes: >
+      Same PeopleConnect flow as Intelius: find the record, confirm by email. URL
+      from the community opt-out list; the broker returns 403 to automated checks,
+      so it was not auto-verified -- confirm in a browser first.
+    source: yaelwrites/Big-Ass-Data-Broker-Opt-Out-List
+
+  nuwber:
+    kind: opt_out_form
+    url: https://nuwber.com/removal/link
+    requires_email_confirmation: true
+    drop_covered: true
+    estimated_effort_minutes: 10
+    recheck_after_days: 45
+    notes: >
+      Paste the profile URL and confirm by email. URL from the community opt-out
+      list; the broker returns 403 to automated checks, so it was not
+      auto-verified -- confirm in a browser first.
+    source: yaelwrites/Big-Ass-Data-Broker-Opt-Out-List
+
   # ------------------------------------------------------- accounts you hold
   gravatar:
     kind: self_serve_delete
