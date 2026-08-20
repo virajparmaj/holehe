@@ -27,6 +27,10 @@ class RunContext:
     only: tuple[str, ...] = ()
     vault_paths: tuple[str, ...] = ()
     hibp_api_key: str | None = None
+    #: Query HIBP through the k-anonymity range endpoint (send 6 hash characters)
+    #: rather than the plaintext endpoint (send the whole address). Defaults to
+    #: the private path; set False only when the user opts into plaintext.
+    hibp_kanon: bool = True
     extras: dict = field(default_factory=dict)
 
 

@@ -52,6 +52,17 @@ class EmailAddress:
         return hashlib.sha256(self.normalized.encode()).hexdigest()
 
     @property
+    def sha1(self) -> str:
+        """Uppercase SHA-1 of the normalised address.
+
+        HIBP's k-anonymity email search keys on this: the address is treated as
+        case-insensitive and trimmed, so hashing the normalized form matches what
+        the service hashed on its side. Uppercase hex matches the range API's
+        returned `hashSuffix` casing, so a suffix comparison needs no folding.
+        """
+        return hashlib.sha1(self.normalized.encode()).hexdigest().upper()
+
+    @property
     def normalized(self) -> str:
         return self.raw.strip().lower()
 
