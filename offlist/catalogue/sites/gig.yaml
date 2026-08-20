@@ -1,0 +1,68 @@
+# gig -- freelancing and gig economy platforms.
+
+- id: fiverr
+  domain: fiverr.com
+  category: gig
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.fiverr.com/users/check_email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.fiverr.com"
+        Referer: "https://www.fiverr.com/join"
+        X-Requested-With: XMLHttpRequest
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "taken" } }
+      then: registered
+    - when: { body: { contains: "available" } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: upwork
+  domain: upwork.com
+  category: gig
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.upwork.com/api/v3/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.upwork.com"
+        Referer: "https://www.upwork.com/signup/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: taskrabbit
+  domain: taskrabbit.com
+  category: gig
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.taskrabbit.com/api/v3/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.taskrabbit.com"
+        Referer: "https://www.taskrabbit.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

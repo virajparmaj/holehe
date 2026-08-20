@@ -1,0 +1,46 @@
+# news -- news, media, and publishing platforms.
+
+- id: medium
+  domain: medium.com
+  category: news
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://medium.com/_/graphql
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://medium.com"
+        Referer: "https://medium.com/m/signin"
+      body:
+        json:
+          query: "query { emailExists(email: \"{email}\") }"
+  rules:
+    - when: { json: { path: "data.emailExists", equals: true } }
+      then: registered
+    - when: { json: { path: "data.emailExists", exists: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: substack
+  domain: substack.com
+  category: news
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://substack.com/api/v1/email/check
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://substack.com"
+        Referer: "https://substack.com/sign-in"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

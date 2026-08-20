@@ -85,3 +85,27 @@
   method: other
   plugin: legacy
   canary: { tier: c, discriminating: "yes" }
+
+- id: microsoft
+  domain: microsoft.com
+  category: software
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://login.microsoftonline.com/common/GetCredentialType
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://login.microsoftonline.com"
+        Referer: "https://login.microsoftonline.com/"
+      body:
+        json: { username: "{email}" }
+  rules:
+    - when: { json: { path: IfExistsResult, in: [0, 5, 6] } }
+      then: registered
+    - when: { json: { path: IfExistsResult, equals: 1 } }
+      then: not_registered
+    - when: { json: { path: IfExistsResult, equals: 2 } }
+      then: rate_limited
+  canary: { tier: c, discriminating: "unverified" }

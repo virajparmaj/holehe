@@ -1,0 +1,130 @@
+# fitness -- health, fitness, and wellness platforms.
+
+- id: myfitnesspal
+  domain: myfitnesspal.com
+  category: fitness
+  method: register
+  steps:
+    - id: check
+      method: GET
+      url: https://www.myfitnesspal.com/api/auth/email_exists
+      params: { email: "{email}" }
+      headers:
+        Accept: "application/json"
+        Referer: "https://www.myfitnesspal.com/account/create"
+  rules:
+    - when: { json: { path: exists, equals: true } }
+      then: registered
+    - when: { json: { path: exists, equals: false } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: fitbit
+  domain: fitbit.com
+  category: fitness
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.fitbit.com/api/account/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.fitbit.com"
+        Referer: "https://www.fitbit.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: peloton
+  domain: onepeloton.com
+  category: fitness
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://api.onepeloton.com/api/user/account/check
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.onepeloton.com"
+        Referer: "https://www.onepeloton.com/app/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: noom
+  domain: noom.com
+  category: fitness
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.noom.com/api/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.noom.com"
+        Referer: "https://www.noom.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: headspace
+  domain: headspace.com
+  category: fitness
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.headspace.com/api/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.headspace.com"
+        Referer: "https://www.headspace.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: calm
+  domain: calm.com
+  category: fitness
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://api.calm.com/v1/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.calm.com"
+        Referer: "https://www.calm.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

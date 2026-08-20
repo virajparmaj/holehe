@@ -1,6 +1,5 @@
-# porn -- generated from the legacy module tree on 2026-08-18.
-# `enabled: false` records what the site actually did when measured;
-# `plugin: legacy` marks entries not yet ported to declarative steps.
+# porn -- adult content sites and cam platforms.
+# High-privacy-sensitivity: registration here is sensitive information.
 
 - id: pornhub
   domain: pornhub.com
@@ -51,3 +50,203 @@
     - when: { json: { path: result, exists: true } }
       then: not_registered
   canary: { tier: c, discriminating: "yes" }
+
+- id: onlyfans
+  domain: onlyfans.com
+  category: porn
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://onlyfans.com/api2/v2/users/registration/check/email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://onlyfans.com"
+        Referer: "https://onlyfans.com/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "taken" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: fansly
+  domain: fansly.com
+  category: porn
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://apiv3.fansly.com/api/v1/account/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://fansly.com"
+        Referer: "https://fansly.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: chaturbate
+  domain: chaturbate.com
+  category: porn
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://chaturbate.com/accounts/check_email/
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/x-www-form-urlencoded"
+        Origin: "https://chaturbate.com"
+        Referer: "https://chaturbate.com/"
+        X-Requested-With: XMLHttpRequest
+      body:
+        form: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "taken" } }
+      then: registered
+    - when: { body: { contains: "available" } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: manyvids
+  domain: manyvids.com
+  category: porn
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.manyvids.com/api/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.manyvids.com"
+        Referer: "https://www.manyvids.com/Register/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: stripchat
+  domain: stripchat.com
+  category: porn
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://stripchat.com/api/front/v2/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://stripchat.com"
+        Referer: "https://stripchat.com/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: bongacams
+  domain: bongacams.com
+  category: porn
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://bongacams.com/tools/check_email.php
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/x-www-form-urlencoded"
+        Origin: "https://bongacams.com"
+        Referer: "https://bongacams.com/"
+        X-Requested-With: XMLHttpRequest
+      body:
+        form: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "taken" } }
+      then: registered
+    - when: { body: { contains: "free" } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: youporn
+  domain: youporn.com
+  category: porn
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.youporn.com/api/account/check-email/
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.youporn.com"
+        Referer: "https://www.youporn.com/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: spankbang
+  domain: spankbang.com
+  category: porn
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://spankbang.com/api/account/check_email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://spankbang.com"
+        Referer: "https://spankbang.com/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: cam4
+  domain: cam4.com
+  category: porn
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.cam4.com/rest/v1.0/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.cam4.com"
+        Referer: "https://www.cam4.com/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

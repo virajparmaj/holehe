@@ -1,0 +1,139 @@
+# gaming -- gaming platforms and stores.
+
+- id: steam
+  domain: store.steampowered.com
+  category: gaming
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://store.steampowered.com/join/ajaxverifyemail
+      headers:
+        Accept: "application/json, text/plain, */*"
+        Content-Type: "application/x-www-form-urlencoded; charset=UTF-8"
+        Origin: "https://store.steampowered.com"
+        Referer: "https://store.steampowered.com/join/"
+      body:
+        form: { email: "{email}" }
+  rules:
+    - when: { json: { path: bAvailable, equals: false } }
+      then: registered
+    - when: { json: { path: bAvailable, equals: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: epicgames
+  domain: epicgames.com
+  category: gaming
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.epicgames.com/id/api/account/check
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.epicgames.com"
+        Referer: "https://www.epicgames.com/id/register"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: riotgames
+  domain: riotgames.com
+  category: gaming
+  method: register
+  steps:
+    - id: check
+      method: PUT
+      url: https://signup-api.riotgames.com/v1/accounts
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://signup.riotgames.com"
+        Referer: "https://signup.riotgames.com/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "email_already_exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: roblox
+  domain: roblox.com
+  category: gaming
+  method: register
+  steps:
+    - id: check
+      method: GET
+      url: https://auth.roblox.com/v1/validators/email
+      params: { email: "{email}" }
+      headers:
+        Accept: "application/json"
+        Origin: "https://www.roblox.com"
+        Referer: "https://www.roblox.com/"
+  rules:
+    - when: { json: { path: isEmailValid, equals: false } }
+      then: registered
+    - when: { json: { path: isEmailValid, equals: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: chess
+  domain: chess.com
+  category: gaming
+  method: register
+  steps:
+    - id: check
+      method: GET
+      url: https://www.chess.com/callback/email/available
+      params: { email: "{email}" }
+      headers:
+        Accept: "application/json"
+        Referer: "https://www.chess.com/register"
+        X-Requested-With: XMLHttpRequest
+  rules:
+    - when: { json: { path: isAvailable, equals: false } }
+      then: registered
+    - when: { json: { path: isAvailable, equals: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: minecraft
+  domain: minecraft.net
+  category: gaming
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Microsoft account auth, no separate email check" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: ubisoft
+  domain: ubisoft.com
+  category: gaming
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://public-ubiservices.ubi.com/v3/users/validateEmail
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Ubi-AppId: "e06033f4-28a4-43fb-8313-6c2d882bc4a3"
+        Origin: "https://account.ubisoft.com"
+        Referer: "https://account.ubisoft.com/register"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "taken" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

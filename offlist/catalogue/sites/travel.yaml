@@ -1,0 +1,108 @@
+# travel -- travel, accommodation, and transportation platforms.
+
+- id: airbnb
+  domain: airbnb.com
+  category: travel
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.airbnb.com/api/v2/email_lookup
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.airbnb.com"
+        Referer: "https://www.airbnb.com/signup_login"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { json: { path: purpose, equals: "login" } }
+      then: registered
+    - when: { json: { path: purpose, equals: "signup" } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: booking
+  domain: booking.com
+  category: travel
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://account.booking.com/api/identity/check
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://account.booking.com"
+        Referer: "https://account.booking.com/register"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: tripadvisor
+  domain: tripadvisor.com
+  category: travel
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.tripadvisor.com/RegistrationController
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/x-www-form-urlencoded"
+        Origin: "https://www.tripadvisor.com"
+        Referer: "https://www.tripadvisor.com/Register"
+        X-Requested-With: XMLHttpRequest
+      body:
+        form: { email: "{email}", mode: "checkEmail" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: uber
+  domain: uber.com
+  category: travel
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Phone auth required" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: lyft
+  domain: lyft.com
+  category: travel
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Phone auth required" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: expedia
+  domain: expedia.com
+  category: travel
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.expedia.com/api/identity/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.expedia.com"
+        Referer: "https://www.expedia.com/login"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

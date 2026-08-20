@@ -1,0 +1,98 @@
+# food -- food delivery and meal kit services.
+
+- id: doordash
+  domain: doordash.com
+  category: food
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://identity.doordash.com/api/v1/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://identity.doordash.com"
+        Referer: "https://identity.doordash.com/auth/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: ubereats
+  domain: ubereats.com
+  category: food
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Shares Uber phone auth" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: grubhub
+  domain: grubhub.com
+  category: food
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://api-gtm.grubhub.com/auth/check_email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.grubhub.com"
+        Referer: "https://www.grubhub.com/login"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: instacart
+  domain: instacart.com
+  category: food
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.instacart.com/api/v3/check_email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.instacart.com"
+        Referer: "https://www.instacart.com/store/account/create"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: hellofresh
+  domain: hellofresh.com
+  category: food
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.hellofresh.com/api/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.hellofresh.com"
+        Referer: "https://www.hellofresh.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

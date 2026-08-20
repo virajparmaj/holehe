@@ -1,0 +1,112 @@
+# streaming -- video/audio streaming platforms.
+
+- id: netflix
+  domain: netflix.com
+  category: streaming
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.netflix.com/api/ftl/page/login
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.netflix.com"
+        Referer: "https://www.netflix.com/login"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "member_exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: hulu
+  domain: hulu.com
+  category: streaming
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://auth.hulu.com/v4/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.hulu.com"
+        Referer: "https://www.hulu.com/welcome"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: disneyplus
+  domain: disneyplus.com
+  category: streaming
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://registerdisney.go.com/jgc/v8/client/ESPN-ONESITE.WEB-PROD/api-key?langPref=en-US
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.disneyplus.com"
+        Referer: "https://www.disneyplus.com/login"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "ACCOUNT_FOUND" } }
+      then: registered
+    - when: { body: { contains: "ACCOUNT_NOT_FOUND" } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: crunchyroll
+  domain: crunchyroll.com
+  category: streaming
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.crunchyroll.com/accounts/v1/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.crunchyroll.com"
+        Referer: "https://www.crunchyroll.com/register"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "taken" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: twitch
+  domain: twitch.tv
+  category: streaming
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://passport.twitch.tv/usernames
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.twitch.tv"
+        Referer: "https://www.twitch.tv/"
+        Client-Id: "kimne78kx3ncx6brgo4mv6wki5h1ko"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "in_use" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

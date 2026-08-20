@@ -1,0 +1,151 @@
+# dating -- dating and hookup platforms.
+# High-privacy-sensitivity sites. Registration on these is particularly
+# sensitive information for a self-audit tool.
+
+- id: tinder
+  domain: tinder.com
+  category: dating
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Phone/Facebook/Apple auth only, no email signup endpoint" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: bumble
+  domain: bumble.com
+  category: dating
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Phone auth only" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: okcupid
+  domain: okcupid.com
+  category: dating
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.okcupid.com/graphql
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.okcupid.com"
+        Referer: "https://www.okcupid.com/signup"
+      body:
+        json:
+          query: "query emailCheck($email: String!) { emailCheck(email: $email) { taken } }"
+          variables: { email: "{email}" }
+  rules:
+    - when: { json: { path: "data.emailCheck.taken", equals: true } }
+      then: registered
+    - when: { json: { path: "data.emailCheck.taken", exists: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: plentyoffish
+  domain: pof.com
+  category: dating
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.pof.com/rest/authService/validateEmail
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.pof.com"
+        Referer: "https://www.pof.com/register"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: hinge
+  domain: hinge.co
+  category: dating
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Phone auth only" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: grindr
+  domain: grindr.com
+  category: dating
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Phone auth, no email check" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: fetlife
+  domain: fetlife.com
+  category: dating
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://fetlife.com/users/check_email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/x-www-form-urlencoded"
+        Origin: "https://fetlife.com"
+        Referer: "https://fetlife.com/signup"
+      body:
+        form: { "user[email]": "{email}" }
+  rules:
+    - when: { body: { contains: "taken" } }
+      then: registered
+    - when: { body: { contains: "available" } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: ashleymadison
+  domain: ashleymadison.com
+  category: dating
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.ashleymadison.com/api/v1/registration/validate-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.ashleymadison.com"
+        Referer: "https://www.ashleymadison.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: adultfriendfinder
+  domain: adultfriendfinder.com
+  category: dating
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://adultfriendfinder.com/p/register.cgi
+      headers:
+        Accept: "*/*"
+        Content-Type: "application/x-www-form-urlencoded"
+        Origin: "https://adultfriendfinder.com"
+        Referer: "https://adultfriendfinder.com/"
+      body:
+        form: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

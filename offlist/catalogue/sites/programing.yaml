@@ -92,3 +92,48 @@
   method: register
   plugin: legacy
   canary: { tier: c, discriminating: "yes" }
+
+- id: gitlab
+  domain: gitlab.com
+  category: programing
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://gitlab.com/users/email_exists
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://gitlab.com"
+        Referer: "https://gitlab.com/users/sign_up"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { json: { path: exists, equals: true } }
+      then: registered
+    - when: { json: { path: exists, equals: false } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: stackoverflow
+  domain: stackoverflow.com
+  category: programing
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://stackoverflow.com/users/validate-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/x-www-form-urlencoded"
+        Origin: "https://stackoverflow.com"
+        Referer: "https://stackoverflow.com/users/signup"
+        X-Requested-With: XMLHttpRequest
+      body:
+        form: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

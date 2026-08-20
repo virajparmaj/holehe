@@ -49,3 +49,116 @@
   method: register
   plugin: legacy
   canary: { tier: c, discriminating: "unverified" }
+
+- id: coursera
+  domain: coursera.org
+  category: learning
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.coursera.org/api/userAccounts.v1
+      params: { action: "getLoginMethods" }
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.coursera.org"
+        Referer: "https://www.coursera.org/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { json: { path: "loginMethods[0]", truthy: true } }
+      then: registered
+    - when: { json: { path: loginMethods, exists: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: udemy
+  domain: udemy.com
+  category: learning
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.udemy.com/api-2.0/auth/check-email/
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.udemy.com"
+        Referer: "https://www.udemy.com/join/signup-popup/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: skillshare
+  domain: skillshare.com
+  category: learning
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.skillshare.com/api/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.skillshare.com"
+        Referer: "https://www.skillshare.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: brilliant
+  domain: brilliant.org
+  category: learning
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://brilliant.org/api/v4/accounts/check-email/
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://brilliant.org"
+        Referer: "https://brilliant.org/signup/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: khanacademy
+  domain: khanacademy.org
+  category: learning
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.khanacademy.org/api/internal/graphql/checkEmail
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.khanacademy.org"
+        Referer: "https://www.khanacademy.org/signup"
+      body:
+        json:
+          query: "query checkEmail($email: String!) { user(email: $email) { id } }"
+          variables: { email: "{email}" }
+  rules:
+    - when: { json: { path: "data.user.id", truthy: true } }
+      then: registered
+    - when: { json: { path: "data.user", exists: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

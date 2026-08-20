@@ -1,0 +1,197 @@
+# cloud -- cloud storage, productivity, and collaboration tools.
+
+- id: dropbox
+  domain: dropbox.com
+  category: cloud
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.dropbox.com/ajax_check_email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/x-www-form-urlencoded"
+        Origin: "https://www.dropbox.com"
+        Referer: "https://www.dropbox.com/register"
+        X-Requested-With: XMLHttpRequest
+      body:
+        form: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: notion
+  domain: notion.so
+  category: cloud
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.notion.so/api/v3/getSpaceEmailOwners
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.notion.so"
+        Referer: "https://www.notion.so/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { json: { path: hasAccount, equals: true } }
+      then: registered
+    - when: { json: { path: hasAccount, exists: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: slack
+  domain: slack.com
+  category: cloud
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://slack.com/api/signup.checkEmail
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/x-www-form-urlencoded"
+        Origin: "https://slack.com"
+        Referer: "https://slack.com/get-started"
+      body:
+        form: { email: "{email}" }
+  rules:
+    - when: { json: { path: ok, equals: false } }
+      then: registered
+    - when: { json: { path: ok, equals: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: trello
+  domain: trello.com
+  category: cloud
+  method: register
+  steps:
+    - id: check
+      method: GET
+      url: https://trello.com/1/search/members
+      params: { query: "{email}" }
+      headers:
+        Accept: "application/json"
+        Referer: "https://trello.com/signup"
+  rules:
+    - when: { json: { path: "[0].id", truthy: true } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: canva
+  domain: canva.com
+  category: cloud
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.canva.com/_ajax/email/check
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.canva.com"
+        Referer: "https://www.canva.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: figma
+  domain: figma.com
+  category: cloud
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.figma.com/api/pre_signup
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.figma.com"
+        Referer: "https://www.figma.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: airtable
+  domain: airtable.com
+  category: cloud
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://airtable.com/auth/checkEmail
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://airtable.com"
+        Referer: "https://airtable.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: asana
+  domain: asana.com
+  category: cloud
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://app.asana.com/-/check_email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://app.asana.com"
+        Referer: "https://asana.com/create-account"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: monday
+  domain: monday.com
+  category: cloud
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://auth.monday.com/check_email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://auth.monday.com"
+        Referer: "https://auth.monday.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

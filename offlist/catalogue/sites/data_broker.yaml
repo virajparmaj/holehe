@@ -1,0 +1,242 @@
+# data_broker -- people search and data broker sites.
+# These are high-priority for privacy audits: they profile people
+# who never signed up. Signup/claim-profile endpoints often leak
+# whether an email is in their database.
+
+- id: beenverified
+  domain: beenverified.com
+  category: data_broker
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.beenverified.com/api/signup/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.beenverified.com"
+        Referer: "https://www.beenverified.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: spokeo
+  domain: spokeo.com
+  category: data_broker
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.spokeo.com/api/signup/validate
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.spokeo.com"
+        Referer: "https://www.spokeo.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "taken" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: whitepages
+  domain: whitepages.com
+  category: data_broker
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.whitepages.com/api/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.whitepages.com"
+        Referer: "https://www.whitepages.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: truepeoplesearch
+  domain: truepeoplesearch.com
+  category: data_broker
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "No account system, search-only site" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: fastpeoplesearch
+  domain: fastpeoplesearch.com
+  category: data_broker
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "No account system, search-only site" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: intelius
+  domain: intelius.com
+  category: data_broker
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.intelius.com/api/signup/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.intelius.com"
+        Referer: "https://www.intelius.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: instantcheckmate
+  domain: instantcheckmate.com
+  category: data_broker
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.instantcheckmate.com/api/signup/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.instantcheckmate.com"
+        Referer: "https://www.instantcheckmate.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: radaris
+  domain: radaris.com
+  category: data_broker
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://radaris.com/api/signup
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://radaris.com"
+        Referer: "https://radaris.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: mylife
+  domain: mylife.com
+  category: data_broker
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.mylife.com/j/registration/checkEmail
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.mylife.com"
+        Referer: "https://www.mylife.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: nuwber
+  domain: nuwber.com
+  category: data_broker
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://nuwber.com/api/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://nuwber.com"
+        Referer: "https://nuwber.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: truthfinder
+  domain: truthfinder.com
+  category: data_broker
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.truthfinder.com/api/signup/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.truthfinder.com"
+        Referer: "https://www.truthfinder.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: socialcatfish
+  domain: socialcatfish.com
+  category: data_broker
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://socialcatfish.com/api/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://socialcatfish.com"
+        Referer: "https://socialcatfish.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

@@ -1,0 +1,156 @@
+# ecommerce -- major e-commerce platforms not in shopping.yaml.
+
+- id: etsy
+  domain: etsy.com
+  category: ecommerce
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.etsy.com/api/v3/ajax/member/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.etsy.com"
+        Referer: "https://www.etsy.com/join"
+        X-Detected-Locale: "USD|en-US|US"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: walmart
+  domain: walmart.com
+  category: ecommerce
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.walmart.com/account/electrode/api/signup/validate
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.walmart.com"
+        Referer: "https://www.walmart.com/account/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: target
+  domain: target.com
+  category: ecommerce
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://gsp.target.com/gsp/authentications/v1/check_user
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.target.com"
+        Referer: "https://www.target.com/account"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: bestbuy
+  domain: bestbuy.com
+  category: ecommerce
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.bestbuy.com/identity/api/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.bestbuy.com"
+        Referer: "https://www.bestbuy.com/identity/global/createAccount"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: shein
+  domain: shein.com
+  category: ecommerce
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://us.shein.com/user/auth/check_email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://us.shein.com"
+        Referer: "https://us.shein.com/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: wish
+  domain: wish.com
+  category: ecommerce
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.wish.com/api/email-check
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.wish.com"
+        Referer: "https://www.wish.com/"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: wayfair
+  domain: wayfair.com
+  category: ecommerce
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.wayfair.com/v/checkout/email_check
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.wayfair.com"
+        Referer: "https://www.wayfair.com/session/register"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

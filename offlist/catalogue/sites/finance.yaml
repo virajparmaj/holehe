@@ -1,0 +1,173 @@
+# finance -- financial services, crypto exchanges, fintech.
+
+- id: paypal
+  domain: paypal.com
+  category: finance
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.paypal.com/signup/api/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.paypal.com"
+        Referer: "https://www.paypal.com/signin"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "ACCOUNT_EXISTS" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: coinbase
+  domain: coinbase.com
+  category: finance
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://login.coinbase.com/api/v1/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://login.coinbase.com"
+        Referer: "https://login.coinbase.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: binance
+  domain: binance.com
+  category: finance
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://accounts.binance.com/bapi/accounts/v1/public/account/email/check
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://accounts.binance.com"
+        Referer: "https://accounts.binance.com/register"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { json: { path: data.exist, equals: true } }
+      then: registered
+    - when: { json: { path: data.exist, equals: false } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: robinhood
+  domain: robinhood.com
+  category: finance
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://api.robinhood.com/user/check_email/
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://robinhood.com"
+        Referer: "https://robinhood.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "registered" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: wise
+  domain: wise.com
+  category: finance
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://wise.com/gateway/v1/email/check
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://wise.com"
+        Referer: "https://wise.com/register"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: revolut
+  domain: revolut.com
+  category: finance
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Phone auth only, no email signup" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: cashapp
+  domain: cash.app
+  category: finance
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Phone/cashtag auth only" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: stripe
+  domain: stripe.com
+  category: finance
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://dashboard.stripe.com/ajax/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://dashboard.stripe.com"
+        Referer: "https://dashboard.stripe.com/register"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: kraken
+  domain: kraken.com
+  category: finance
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.kraken.com/api/internal/account/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.kraken.com"
+        Referer: "https://www.kraken.com/sign-up"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }

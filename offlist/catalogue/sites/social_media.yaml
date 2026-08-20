@@ -224,3 +224,100 @@
   enabled: false
   disabled: { status: endpoint_gone, measured: 2026-08-18, http_code: 404 }
   canary: { tier: c, discriminating: "unverified" }
+
+- id: tiktok
+  domain: tiktok.com
+  category: social_media
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.tiktok.com/api/user/check_email/
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.tiktok.com"
+        Referer: "https://www.tiktok.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { json: { path: "data.is_registered", equals: true } }
+      then: registered
+    - when: { json: { path: "data.is_registered", exists: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: linkedin
+  domain: linkedin.com
+  category: social_media
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://www.linkedin.com/checkpoint/api/email-validation
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://www.linkedin.com"
+        Referer: "https://www.linkedin.com/signup"
+      body:
+        json: { emailAddress: "{email}" }
+  rules:
+    - when: { body: { contains: "ALREADY_REGISTERED" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: reddit
+  domain: reddit.com
+  category: social_media
+  method: register
+  steps:
+    - id: get_csrf
+      method: GET
+      url: https://www.reddit.com/register/
+      headers:
+        Accept: "text/html"
+      capture:
+        csrf_token:
+          from: body
+          via: between
+          start: 'csrf_token" value="'
+          end: '"'
+    - id: check
+      method: POST
+      url: https://www.reddit.com/api/check_email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/x-www-form-urlencoded"
+        Origin: "https://www.reddit.com"
+        Referer: "https://www.reddit.com/register/"
+      body:
+        form:
+          email: "{email}"
+          csrf_token: "{captured.csrf_token}"
+  rules:
+    - when: { body: { contains: "EmailAlreadyExists" } }
+      then: registered
+    - when: { body: { contains: "email" } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: bluesky
+  domain: bsky.app
+  category: social_media
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Invite-code gated, no email check endpoint" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: mastodon
+  domain: mastodon.social
+  category: social_media
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Decentralized, no single endpoint — thousands of instances" }
+  canary: { tier: c, discriminating: "unverified" }

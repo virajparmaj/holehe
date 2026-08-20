@@ -1,0 +1,343 @@
+# ai -- AI tools and platforms.
+# These sites collect emails for AI product signups. Many harvest data
+# aggressively and are high-priority for privacy audits.
+
+- id: huggingface
+  domain: huggingface.co
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://huggingface.co/join
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/x-www-form-urlencoded"
+        Referer: "https://huggingface.co/join"
+      body:
+        form: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "email is already" } }
+      then: registered
+    - when: { body: { contains: "email" } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: kaggle
+  domain: kaggle.com
+  category: ai
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Google SSO only, no email registration endpoint" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: civitai
+  domain: civitai.com
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://civitai.com/api/auth/signup
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Referer: "https://civitai.com/login"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: elevenlabs
+  domain: elevenlabs.io
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://api.elevenlabs.io/v1/user/pre-signup
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://elevenlabs.io"
+        Referer: "https://elevenlabs.io/sign-up"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already registered" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: runwayml
+  domain: runwayml.com
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://api.runwayml.com/v1/signup/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://app.runwayml.com"
+        Referer: "https://app.runwayml.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: replicate
+  domain: replicate.com
+  category: ai
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "GitHub SSO only" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: wandb
+  domain: wandb.ai
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://api.wandb.ai/graphql
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://wandb.ai"
+        Referer: "https://wandb.ai/signup"
+      body:
+        json:
+          query: "query CheckEmail($email: String!) { userByEmail(email: $email) { id } }"
+          variables: { email: "{email}" }
+  rules:
+    - when: { json: { path: "data.userByEmail.id", truthy: true } }
+      then: registered
+    - when: { json: { path: "data.userByEmail", exists: true } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: perplexity
+  domain: perplexity.ai
+  category: ai
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Google/Apple SSO primary, no known email check endpoint" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: poe
+  domain: poe.com
+  category: ai
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Phone/Google auth only, no email signup endpoint" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: characterai
+  domain: character.ai
+  category: ai
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Google SSO only" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: jasper
+  domain: jasper.ai
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://app.jasper.ai/api/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://app.jasper.ai"
+        Referer: "https://app.jasper.ai/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: writesonic
+  domain: writesonic.com
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://api.writesonic.com/v1/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://writesonic.com"
+        Referer: "https://writesonic.com/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: copyai
+  domain: copy.ai
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://app.copy.ai/api/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://app.copy.ai"
+        Referer: "https://app.copy.ai/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: leonardo
+  domain: leonardo.ai
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://app.leonardo.ai/api/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://app.leonardo.ai"
+        Referer: "https://app.leonardo.ai/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: midjourney
+  domain: midjourney.com
+  category: ai
+  method: register
+  plugin: legacy
+  enabled: false
+  disabled: { status: blocked, measured: 2026-08-20, note: "Discord-based auth, no direct email signup" }
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: nightcafe
+  domain: nightcafe.studio
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://creator.nightcafe.studio/api/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://creator.nightcafe.studio"
+        Referer: "https://creator.nightcafe.studio/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: murfai
+  domain: murf.ai
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://murf.ai/api/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://murf.ai"
+        Referer: "https://murf.ai/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: synthesia
+  domain: synthesia.io
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://app.synthesia.io/api/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://app.synthesia.io"
+        Referer: "https://app.synthesia.io/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "already" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
+
+- id: otterai
+  domain: otter.ai
+  category: ai
+  method: register
+  steps:
+    - id: check
+      method: POST
+      url: https://otter.ai/api/auth/check-email
+      headers:
+        Accept: "application/json"
+        Content-Type: "application/json"
+        Origin: "https://otter.ai"
+        Referer: "https://otter.ai/signup"
+      body:
+        json: { email: "{email}" }
+  rules:
+    - when: { body: { contains: "exists" } }
+      then: registered
+    - when: { status: { eq: 200 } }
+      then: not_registered
+  canary: { tier: c, discriminating: "unverified" }
