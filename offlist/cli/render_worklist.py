@@ -6,6 +6,7 @@ import json
 from typing import Sequence
 
 from offlist.core.models import ServiceRecord
+from offlist.worklist.score import ASSOCIATION_DESCRIPTIONS
 from offlist.worklist.triage import FLAG_DESCRIPTIONS
 
 SEVERITY_ORDER = ("high", "medium", "low")
@@ -31,6 +32,9 @@ def to_markdown(records: Sequence[ServiceRecord], email: str) -> str:
         for r in rows:
             lines.append(f"### {r.display_name}")
             lines.append(f"`{', '.join(r.domains)}`")
+            lines.append("")
+            lines.append(f"**Association:** {r.association} ({r.score}/100) — "
+                         f"{ASSOCIATION_DESCRIPTIONS.get(r.association, '')}")
             lines.append("")
             if r.why_flagged:
                 lines.append("**Why it's here**")
@@ -78,7 +82,7 @@ def to_terminal(records: Sequence[ServiceRecord], email: str) -> str:
         for r in rows:
             rem = r.remediation or {}
             flags = ",".join(r.why_flagged) or "-"
-            lines.append(f"  {r.display_name:32s} {flags}")
+            lines.append(f"  {r.display_name:28s} {r.association:9s} {r.score:>3d}  {flags}")
             lines.append(f"    {rem.get('kind','none_known')}: {rem.get('url','(no known route)')}")
         lines.append("")
     lines.append("full detail: offlist worklist --format md")

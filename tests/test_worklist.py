@@ -155,3 +155,24 @@ def test_stored_worklist_is_not_world_readable(tmp_path, monkeypatch):
     path = store.save(email, triage.triage(merge.merge([ev("probe", "x.test")])))
     assert oct(path.stat().st_mode)[-3:] == "600"
     assert "someone" not in str(path), "the address must not appear in the path"
+
+
+def test_a_signup_email_is_account_on_record_not_never_signed_up():
+    """A verification/welcome message proves you signed up, so it must not be
+    labelled 'you did not sign up here'."""
+    records = triage.triage(merge.merge(
+        [ev("mailbox", "myspace.com", payload={"account_signal": True})],
+        vault_domains=set()))
+    flags = records[0].why_flagged
+    assert "account_on_record" in flags
+    assert "never_signed_up" not in flags
+
+
+def test_marketing_only_mail_still_reads_as_never_signed_up():
+    """Marketing mail is not a signup record, so the headline flag still fires."""
+    records = triage.triage(merge.merge(
+        [ev("mailbox", "store.test", payload={"account_signal": False})],
+        vault_domains=set()))
+    flags = records[0].why_flagged
+    assert "never_signed_up" in flags
+    assert "account_on_record" not in flags

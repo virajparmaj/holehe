@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Iterable, Sequence
 
 from offlist.core.models import ServiceRecord
+from offlist.worklist.score import score_for
 
 DORMANT_AFTER = timedelta(days=365 * 3)
 
@@ -17,6 +18,7 @@ SEVERITY_RANK = {"low": 0, "medium": 1, "high": 2}
 
 FLAG_DESCRIPTIONS = {
     "never_signed_up": "holds your address but is absent from your vault -- you did not sign up here",
+    "account_on_record": "your own saved mail shows you signed up here -- an account you may have forgotten",
     "data_broker": "a registered data broker: it trades in personal data and you never had a relationship with it",
     "breached": "has already lost your address in a known breach",
     "publicly_exposed": "your address is publicly readable through this service",
@@ -58,10 +60,20 @@ def flags_for(record: ServiceRecord, *, now: datetime | None = None) -> list[str
            for e in record.evidence):
         flags.append("recovery_leak")
 
-    # The headline signal: something can prove it holds the address, and your own
-    # credential store has no record of you ever creating an account.
+    # Your own mail showing a verification/welcome/reset message is a record that
+    # you did sign up -- so it is the opposite of `never_signed_up`, and it must
+    # suppress that flag rather than sit alongside it.
+    has_signup_mail = any(e.source == "mailbox" and e.payload.get("account_signal")
+                          for e in record.evidence)
+    if has_signup_mail:
+        flags.append("account_on_record")
+
+    # The headline signal: something can prove it holds the address, and you have
+    # no record of ever creating an account -- neither a stored credential nor a
+    # signup message in your own mail.
     positives = [e for e in record.evidence if e.is_positive]
-    if positives and not record.in_vault and "data_broker" not in flags:
+    has_signup_record = record.in_vault or has_signup_mail
+    if positives and not has_signup_record and "data_broker" not in flags:
         flags.append("never_signed_up")
 
     if record.in_vault:
@@ -102,5 +114,6 @@ def triage(records: Iterable[ServiceRecord], *,
         # places your address here -- a probe hit, a breach record, your vault.
         corroborated = any(e.source != "broker_registry" for e in record.evidence)
         record.severity = severity_for(record.why_flagged, corroborated=corroborated)
+        record.score, record.association = score_for(record)
         out.append(record)
     return sorted(out, key=lambda r: (-SEVERITY_RANK[r.severity], r.service))

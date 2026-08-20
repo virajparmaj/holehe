@@ -158,6 +158,11 @@ class ServiceRecord:
     in_vault: bool = False
     why_flagged: list[str] = field(default_factory=list)
     severity: str = "low"
+    #: Deterministic 0-100 strength of the evidence that you are associated with
+    #: this service, and which of four plain-English states that maps to. See
+    #: offlist.worklist.score -- and note `unknown` never means "no account".
+    score: int = 0
+    association: str = "unknown"
     remediation: Mapping[str, Any] | None = None
     state: str = "todo"
     actions_taken: list[Mapping[str, Any]] = field(default_factory=list)
