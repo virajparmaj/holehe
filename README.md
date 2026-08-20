@@ -48,15 +48,21 @@ proven it distinguishes a real address from a fabricated one. If it hasn't, its
 forum clones differing only in a base URL — roughly 2,000 lines that are now one
 engine and 25 one-line rows.
 
-**Probing is one source of five.** The others are better at the actual question:
+**Probing is one source of six.** The others are better at the actual question:
 
 | Source | Question it answers | Precision |
 |---|---|---|
 | Vault CSV import | Where did I *deliberately* sign up? | exact, offline |
+| Mailbox evidence | Where did I get a welcome/verification/reset mail? | high, offline, dated |
 | Data-broker registry | Who holds my data that I never gave them? | exact — registration is compulsory |
 | Public exposure | Where is my address publicly readable? | high |
-| Breach data (HIBP) | Who has already lost my address? | high, opt-in |
+| Breach data (HIBP) | Who has already lost my address? | high, opt-in, k-anonymous |
 | Endpoint probing | Accounts I forgot, or never made | low until canary-verified |
+
+Every source emits only dated evidence; a per-service **confidence score (0–100)**
+and one of four association states — `confirmed`, `likely`, `exposure`,
+`unknown` — is computed from that evidence in one place. `unknown` means
+*insufficient evidence*, never "no account".
 
 ## Install
 
@@ -90,10 +96,12 @@ Import a password-manager export — 1Password, Bitwarden, Chrome, Firefox:
 offlist import you@example.com ~/Downloads/export.csv
 ```
 
-Build the removal worklist:
+Build the removal worklist. `--mail` reads your own saved mail (`.eml`, mbox, or
+maildir) for welcome/verification/reset messages — the strongest, and dated,
+forgotten-account signal, entirely offline:
 
 ```bash
-offlist worklist you@example.com --vault ~/Downloads/export.csv --jurisdiction CA --format md
+offlist worklist you@example.com --vault ~/Downloads/export.csv --mail ~/saved-mail/ --jurisdiction CA --format md
 ```
 
 Work through the plan. Dry run by default — nothing leaves your machine:
@@ -221,8 +229,12 @@ been breached, which leak recovery identifiers. It is stored under
 `~/.local/state/offlist/`, mode `0600`, with the address hashed into the path
 rather than written into a filename.
 
-HIBP's breach API has no k-anonymity: querying it sends your address in plaintext
-to a third party. Nothing is queried without an explicit key
+HIBP is queried through its k-anonymity range endpoint by default: only the
+first six characters of your address's SHA-1 hash leave the machine, and the
+match is finished locally, so the address itself is never disclosed. The breach
+names that come back are joined against HIBP's public catalogue to recover the
+same detail the plaintext endpoint returns. `--hibp-plaintext` opts back into
+sending the whole address; either way nothing is queried without an explicit key
 (`offlist worklist --explain-hibp`).
 
 ## What this is not

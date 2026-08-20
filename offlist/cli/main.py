@@ -66,12 +66,19 @@ def build_parser() -> argparse.ArgumentParser:
     work.add_argument("-o", "--output", metavar="PATH")
     work.add_argument("--vault", action="append", default=[], metavar="CSV",
                       help="password-manager export (repeatable)")
+    work.add_argument("--mail", action="append", default=[], metavar="PATH",
+                      help="your own saved mail -- .eml file, mbox, or maildir. "
+                           "Verification/welcome/reset mail is the strongest "
+                           "forgotten-account signal (repeatable, offline)")
     work.add_argument("--jurisdiction", default="", metavar="CA|EU|UK",
                       help="selects which statutory deletion right applies")
     work.add_argument("--skip-probe", action="store_true",
                       help="use stored evidence rather than re-probing the catalogue")
     work.add_argument("--hibp-key", metavar="KEY",
                       help="Have I Been Pwned API key (see --explain-hibp)")
+    work.add_argument("--hibp-plaintext", action="store_true",
+                      help="query HIBP with the whole address instead of the "
+                           "default k-anonymity hash range (see --explain-hibp)")
     work.add_argument("--explain-hibp", action="store_true",
                       help="explain what querying HIBP discloses, then exit")
     work.add_argument("--include-all-brokers", action="store_true",
@@ -225,7 +232,9 @@ def cmd_worklist(args: argparse.Namespace) -> int:
         timeout=args.timeout,
         vault_paths=tuple(args.vault),
         hibp_api_key=hibp_key,
-        extras={"include_all_brokers": args.include_all_brokers},
+        hibp_kanon=not args.hibp_plaintext,
+        extras={"include_all_brokers": args.include_all_brokers,
+                "mail_paths": tuple(args.mail)},
     )
 
     sources = [BrokerRegistrySource(), PublicExposureSource()]
@@ -233,10 +242,18 @@ def cmd_worklist(args: argparse.Namespace) -> int:
         from offlist.sources.vault_csv import VaultCsvSource
 
         sources.insert(0, VaultCsvSource())
+    if args.mail:
+        from offlist.sources.mailbox import MailboxSource
+
+        sources.insert(0, MailboxSource())
     if not args.skip_probe:
         sources.append(ProbeSource())
     if hibp_key:
         sources.append(HibpSource())
+        how = "plaintext -- sends your whole address" if args.hibp_plaintext \
+            else "k-anonymity -- sends 6 hash characters, matched locally"
+        print(f"(HIBP: {how}. `offlist worklist --explain-hibp` explains the "
+              "trade-off.)\n", file=sys.stderr)
     else:
         print("(HIBP not queried -- no key. `offlist worklist --explain-hibp` "
               "explains what it would disclose.)\n", file=sys.stderr)
@@ -244,8 +261,18 @@ def cmd_worklist(args: argparse.Namespace) -> int:
     async def gather():
         found = []
         for source in sources:
-            async for ev in source.collect(email, ctx):
-                found.append(ev)
+            try:
+                async for ev in source.collect(email, ctx):
+                    found.append(ev)
+            except Exception as exc:
+                # One source failing -- a wrong-tier HIBP key, a network blip, a
+                # missing registry cache -- must not lose the other sources' work.
+                note = f"({source.id} source failed: {type(exc).__name__}: {exc}"
+                if source.id == "hibp" and not args.hibp_plaintext:
+                    note += ". The k-anonymity range endpoint needs a key tier "
+                    note += "that allows it; --hibp-plaintext uses the basic lookup"
+                note += " -- other sources continue.)"
+                print(note, file=sys.stderr)
         return found
 
     evidence = asyncio.run(gather())
