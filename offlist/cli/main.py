@@ -40,7 +40,13 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--no-color", action="store_true")
     scan.add_argument("-v", "--verbose", action="store_true",
                       help="show per-site detail and disabled entries")
-    scan.add_argument("-T", "--timeout", type=float, default=15.0)
+    scan.add_argument("-T", "--timeout", type=float, default=15.0,
+                      help="httpx per-operation timeout (connect/read/write/pool)")
+    scan.add_argument("--site-budget", type=float, default=8.0, metavar="SECONDS",
+                      help="wall-clock one site may take before it is cut and "
+                           "recorded as timed_out; 0 disables. A scan takes as "
+                           "long as its slowest single site, so this is the knob "
+                           "that sets how long a scan runs (default: 8)")
     scan.add_argument("-c", "--concurrency", type=int, default=16)
     scan.add_argument("--csv", metavar="PATH", nargs="?", const="auto")
     scan.add_argument("--json", metavar="PATH", nargs="?", const="auto")
@@ -85,6 +91,8 @@ def build_parser() -> argparse.ArgumentParser:
                       help="list all ~600 registered brokers individually instead of "
                            "one DROP-covered aggregate")
     work.add_argument("-T", "--timeout", type=float, default=15.0)
+    work.add_argument("--site-budget", type=float, default=8.0, metavar="SECONDS",
+                      help="wall-clock one probed site may take; 0 disables")
 
     # ---- act
     act = sub.add_parser(
@@ -127,6 +135,10 @@ def build_parser() -> argparse.ArgumentParser:
     canary.add_argument("--write-ledger", action="store_true",
                         help="persist the outcome to catalogue/ledger.yaml")
     canary.add_argument("-T", "--timeout", type=float, default=20.0)
+    canary.add_argument("--site-budget", type=float, default=20.0, metavar="SECONDS",
+                        help="wall-clock one site may take; 0 disables. Higher "
+                             "than scan's default on purpose -- a canary that "
+                             "cuts a slow site cannot prove anything about it")
     canary.add_argument("-c", "--concurrency", type=int, default=8)
 
     # ---- doctor
@@ -134,6 +146,13 @@ def build_parser() -> argparse.ArgumentParser:
     doctor.add_argument("--by", choices=["status", "category"], default="status")
 
     return parser
+
+
+def _budget(seconds: float | None) -> float | None:
+    """`--site-budget 0` (or negative) means "wait as long as it takes"."""
+    if seconds is None or seconds <= 0:
+        return None
+    return seconds
 
 
 def _resolve_email(raw: str) -> EmailAddress:
@@ -158,6 +177,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
     ctx = RunContext(
         timeout=args.timeout,
+        site_budget=_budget(args.site_budget),
         concurrency=args.concurrency,
         include_disabled=args.include_disabled,
         allow_login_probe=args.allow_login_probe,
@@ -230,6 +250,7 @@ def cmd_worklist(args: argparse.Namespace) -> int:
 
     ctx = RunContext(
         timeout=args.timeout,
+        site_budget=_budget(args.site_budget),
         vault_paths=tuple(args.vault),
         hibp_api_key=hibp_key,
         hibp_kanon=not args.hibp_plaintext,
@@ -446,6 +467,7 @@ def cmd_canary(args: argparse.Namespace) -> int:
         positives = loaded.get("sites", loaded)
 
     ctx = RunContext(timeout=args.timeout, concurrency=args.concurrency,
+                     site_budget=_budget(args.site_budget),
                      include_disabled=args.include_disabled)
 
     negative = random_negative()

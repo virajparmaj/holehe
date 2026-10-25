@@ -21,6 +21,8 @@ GLYPH = {
     Status.BLOCKED: ("[#]", "yellow", "blocked by bot protection -- needs a different client"),
     Status.ENDPOINT_GONE: ("[404]", "red", "endpoint gone -- the definition is stale"),
     Status.UNREACHABLE: ("[!]", "red", "unreachable -- host may be dead"),
+    Status.TIMED_OUT: ("[t]", "yellow",
+                       "too slow for the per-site budget -- raise --site-budget to wait longer"),
     Status.SERVER_ERROR: ("[5xx]", "red", "server error on their side"),
     Status.PARSE_FAILED: ("[~]", "red", "unrecognised response -- the definition is stale"),
     Status.DISABLED: ("[.]", "white", "disabled in the catalogue"),
@@ -30,7 +32,7 @@ GLYPH = {
 ORDER = [
     Status.REGISTERED, Status.INDETERMINATE, Status.NOT_REGISTERED,
     Status.RATE_LIMITED, Status.BLOCKED, Status.SERVER_ERROR,
-    Status.ENDPOINT_GONE, Status.PARSE_FAILED, Status.UNREACHABLE,
+    Status.TIMED_OUT, Status.ENDPOINT_GONE, Status.PARSE_FAILED, Status.UNREACHABLE,
     Status.SKIPPED, Status.DISABLED,
 ]
 
