@@ -29,12 +29,11 @@ BLOCK_MARKERS = (
 )
 
 #: Exception class names that mean we never got an application response at all.
+#: ConnectTimeout stays here rather than in TIMEOUT_EXCEPTIONS: nothing ever
+#: answered, so "the host may be dead" is the accurate reading.
 UNREACHABLE_EXCEPTIONS = (
     "ConnectError",
     "ConnectTimeout",
-    "ReadTimeout",
-    "WriteTimeout",
-    "PoolTimeout",
     "ReadError",
     "WriteError",
     "RemoteProtocolError",
@@ -45,12 +44,27 @@ UNREACHABLE_EXCEPTIONS = (
     "NetworkError",
 )
 
+#: Exception class names that mean the host was alive but too slow for the budget
+#: we allowed it. Separating these from UNREACHABLE matters for the same reason
+#: the whole taxonomy exists: "host may be dead" is a claim, and a host that
+#: completed a TCP handshake and then trickled has not earned it. The remedy is
+#: also different -- raise --site-budget, or stop asking this host.
+TIMEOUT_EXCEPTIONS = (
+    "ReadTimeout",
+    "WriteTimeout",
+    "PoolTimeout",
+    "TimeoutException",
+    "TimeoutError",
+)
+
 
 def status_for_exception(exc: BaseException) -> tuple[Status, str]:
     """Classify a transport-level failure."""
     kind = type(exc).__name__
     if kind in UNREACHABLE_EXCEPTIONS:
         return Status.UNREACHABLE, f"{kind}: {exc}"
+    if kind in TIMEOUT_EXCEPTIONS:
+        return Status.TIMED_OUT, f"{kind}: {exc}"
     return Status.PARSE_FAILED, f"{kind}: {exc}"
 
 

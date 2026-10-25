@@ -30,7 +30,11 @@ class Status(str, Enum):
     RATE_LIMITED = "rate_limited"          # 429 / explicit throttle -- retry later
     BLOCKED = "blocked"                    # WAF, bot check, captcha -- needs a different client
     ENDPOINT_GONE = "endpoint_gone"        # 404/410 -- the definition is stale
-    UNREACHABLE = "unreachable"            # DNS/connect/TLS/timeout -- the host may be dead
+    UNREACHABLE = "unreachable"            # DNS/connect/TLS -- the host may be dead
+    #: The host answered, or was answering, but not inside the budget one site is
+    #: allowed. Distinct from UNREACHABLE because the remedy is different: the
+    #: host is alive, so the choice is to wait longer or to stop asking it.
+    TIMED_OUT = "timed_out"                # exceeded --site-budget or a read timeout
     SERVER_ERROR = "server_error"          # 5xx -- their problem, probably transient
     PARSE_FAILED = "parse_failed"          # 200, but nothing matched -- the definition is stale
     DISABLED = "disabled"                  # not executed: enabled=false in the catalogue
@@ -49,6 +53,7 @@ class Status(str, Enum):
             Status.BLOCKED,
             Status.ENDPOINT_GONE,
             Status.UNREACHABLE,
+            Status.TIMED_OUT,
             Status.SERVER_ERROR,
             Status.PARSE_FAILED,
         )

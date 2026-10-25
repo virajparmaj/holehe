@@ -9,6 +9,7 @@ negatives are downgraded unless a canary proved the site discriminates.
 from __future__ import annotations
 
 import asyncio
+import time
 from typing import AsyncIterator, Iterable, Sequence
 
 import httpx
@@ -25,18 +26,39 @@ from offlist.sources.base import RunContext
 
 async def _run_one(entry: Entry, email: EmailAddress, client: httpx.AsyncClient,
                    limiter: HostLimiter, timeout: float,
-                   progress=None, *, downgrade: bool = True) -> ProbeResult:
+                   progress=None, *, downgrade: bool = True,
+                   budget: float | None = None) -> ProbeResult:
     url = entry.steps[0].url if entry.steps else f"https://{entry.domain}"
+    started = time.monotonic()
     try:
         async with limiter.for_url(url):
-            result = await run_entry(entry, email, client, default_timeout=timeout)
+            # The budget starts once the host slot is free. Time spent queueing
+            # behind another request to the same host is our scheduling, not
+            # their latency, and charging it to the site would cut fast sites
+            # loose for being unlucky.
+            started = time.monotonic()
+            result = await asyncio.wait_for(
+                run_entry(entry, email, client, default_timeout=timeout), budget)
+    except asyncio.TimeoutError:
+        # Not UNREACHABLE: the host may well be answering, just not inside the
+        # share of the run one site is allowed. `-T/--timeout` cannot express
+        # this -- it is httpx's per-operation timeout, so a three-step entry can
+        # legitimately run three times that long, and a response that trickles
+        # never trips it at all.
+        result = ProbeResult(
+            site_id=entry.id, domain=entry.domain, status=Status.TIMED_OUT,
+            category=entry.category, method=entry.method,
+            detail=f"no verdict within the {budget:g}s per-site budget",
+            discriminating=entry.canary.discriminating,
+            elapsed_ms=int((time.monotonic() - started) * 1000))
     except Exception as exc:  # nothing below should escape, but a scan must not die
         from offlist.core.status_map import status_for_exception
 
         status, detail = status_for_exception(exc)
         result = ProbeResult(site_id=entry.id, domain=entry.domain, status=status,
                              category=entry.category, method=entry.method, detail=detail,
-                             discriminating=entry.canary.discriminating)
+                             discriminating=entry.canary.discriminating,
+                             elapsed_ms=int((time.monotonic() - started) * 1000))
     finally:
         if progress is not None:
             progress.update(1)
@@ -75,19 +97,28 @@ async def run_probes(email: EmailAddress, ctx: RunContext,
     limiter = HostLimiter(per_host=2)
     sem = asyncio.Semaphore(ctx.concurrency)
 
+    # The pool has to be at least as wide as the semaphore. It was pinned at 30
+    # while --concurrency defaulted to 16 and accepted any number, so `-c 64` did
+    # not run 64 probes: 34 of them queued for a connection, and that queueing
+    # came out of their own per-site budget as a PoolTimeout the site never
+    # caused. Sizing it from the semaphore makes the flag mean what it says.
+    pool = max(ctx.concurrency, 1)
+
     # RecordingClient so legacy-bridged entries can still be classified by what
     # the server actually did rather than by their own rateLimit boolean.
     client = RecordingClient(
         timeout=ctx.timeout,
         follow_redirects=True,
-        limits=httpx.Limits(max_connections=30, max_keepalive_connections=10),
+        limits=httpx.Limits(max_connections=pool,
+                            max_keepalive_connections=max(pool // 3, 10)),
         headers={**DEFAULT_HEADERS, "User-Agent": random_user_agent()},
     )
 
     async def guarded(entry: Entry) -> ProbeResult:
         async with sem:
             return await _run_one(entry, email, client, limiter, ctx.timeout,
-                                  progress, downgrade=downgrade)
+                                  progress, downgrade=downgrade,
+                                  budget=ctx.site_budget)
 
     try:
         results = await asyncio.gather(*(guarded(e) for e in entries),

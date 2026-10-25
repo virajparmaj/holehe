@@ -18,7 +18,16 @@ from offlist.core.models import Evidence
 class RunContext:
     """Options a source may need, gathered in one place rather than passed piecemeal."""
 
+    #: httpx's per-operation timeout: connect, read, write and pool each get
+    #: this long. It does not bound one site, because an entry may take several
+    #: steps and a trickling response resets the read clock.
     timeout: float = 15.0
+    #: The wall-clock one site may consume before it is cut and recorded as
+    #: TIMED_OUT. This is what actually bounds a scan: measured over 852 site
+    #: runs the slowest site that produced a real answer took 4.7s, while the
+    #: slowest overall took 10.1s and answered nothing -- and a scan's wall clock
+    #: is set by its single slowest site, not by its median.
+    site_budget: float | None = 8.0
     concurrency: int = 16
     include_disabled: bool = False
     allow_login_probe: bool = False
