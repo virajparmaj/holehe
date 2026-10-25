@@ -48,6 +48,23 @@ proven it distinguishes a real address from a fabricated one. If it hasn't, its
 forum clones differing only in a base URL — roughly 2,000 lines that are now one
 engine and 25 one-line rows.
 
+**A slow site cannot hold the scan hostage.** A scan's wall clock turned out to
+be set by its single slowest site and by nothing else. The median site answers in
+224ms and the 95th percentile in 1.2s, but in one 142-site run `coroflot` alone
+took 10.1s — and the whole run took 11.8s. Dropping that one site would have
+finished it in 5.2s. The slowest sites are also, consistently, the ones that
+answer nothing: across 852 site-runs the slowest site that produced a real
+verdict took 4.7s, while everything above that was `endpoint_gone` or
+`indeterminate`.
+
+`-T/--timeout` never bounded this, and could not: it is httpx's *per-operation*
+timeout, so a three-step entry may spend it three times over and a response that
+keeps trickling never trips it at all. `--site-budget` (default 8s) is a hard
+wall-clock bound on one site. Exceeding it is its own status, `timed_out` —
+distinct from `unreachable`, because a host that completed a handshake and then
+dawdled has not earned "may be dead", and distinct from `parse_failed`, because
+their latency is not our stale definition.
+
 **Probing is one source of six.** The others are better at the actual question:
 
 | Source | Question it answers | Precision |
@@ -76,6 +93,14 @@ Probe the catalogue for one address:
 
 ```bash
 offlist scan you@example.com
+```
+
+A scan takes as long as its slowest single site, so `--site-budget` is the knob
+that sets how long it runs. `5` costs no answers in measurement and finishes in
+about 6s; `0` waits as long as every site wants:
+
+```bash
+offlist scan you@example.com --site-budget 5
 ```
 
 Catalogue health, no network:
